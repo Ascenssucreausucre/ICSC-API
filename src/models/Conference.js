@@ -11,6 +11,7 @@ module.exports = (sequelize) => {
       title: { type: DataTypes.STRING, allowNull: false },
       acronym: { type: DataTypes.STRING, allowNull: false },
       conference_index: { type: DataTypes.INTEGER, allowNull: false },
+      current: { type: DataTypes.TINYINT, defaultValue: 0 },
     },
     {
       tableName: "conferences", // Nom de la table en base de données

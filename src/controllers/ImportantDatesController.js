@@ -1,26 +1,79 @@
 const { ImportantDates } = require("../models");
 
+// ====================== MÉTHODES "DATA" ====================== //
+
+// Récupère toutes les dates importantes
+exports.getAllImportantDatesData = async () => {
+  return await ImportantDates.findAll();
+};
+
+// Récupère une date importante par ID
+exports.getImportantDatesByIdData = async (id) => {
+  return await ImportantDates.findByPk(id);
+};
+
+// Récupère les dates importantes d'une conférence spécifique
+exports.getCurrentImportantDatesData = async (conference_id) => {
+  try {
+    const currentDates = await ImportantDates.findOne({
+      where: { conference_id },
+    });
+
+    // if (!currentDates) {
+    //   const error = new Error("No dates found");
+    //   error.statusCode = 404;
+    //   throw error;
+    // }
+
+    return currentDates;
+  } catch (error) {
+    error.statusCode = error.statusCode || 500;
+    throw error;
+  }
+};
+
+// ====================== MÉTHODES "HTTP" ====================== //
+
+// Récupère toutes les dates importantes
 exports.getAllImportantDates = async (req, res) => {
   try {
-    const dates = await ImportantDates.findAll();
-    res.json(dates);
+    const dates = await exports.getAllImportantDatesData();
+    res.status(200).json(dates);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// Récupère une date importante par ID
 exports.getImportantDatesById = async (req, res) => {
   try {
-    const dates = await ImportantDates.findByPk(req.params.id);
+    const { id } = req.params;
+    const dates = await exports.getImportantDatesByIdData(id);
+
     if (!dates) {
       return res.status(404).json({ message: "Dates non trouvées" });
     }
-    res.json(dates);
+
+    res.status(200).json(dates);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// Récupère les dates importantes actuelles d'une conférence
+exports.getCurrentImportantDates = async (req, res) => {
+  try {
+    const { conference_id } = req.params;
+    const currentDates = await exports.getCurrentImportantDatesData(
+      conference_id
+    );
+    res.status(200).json(currentDates);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ error: error.message });
+  }
+};
+
+// Crée une date importante
 exports.createImportantDate = async (req, res) => {
   try {
     const importantDate = await ImportantDates.create(req.body);
@@ -33,43 +86,22 @@ exports.createImportantDate = async (req, res) => {
   }
 };
 
+// Met à jour les dates importantes d'une conférence
 exports.updateImportantDates = async (req, res) => {
   try {
-    const { conference_id } = req.params; // On récupère l'ID de la conférence depuis les paramètres de l'URL
-    const {
-      initial_submission_due,
-      paper_decision_notification,
-      final_submission_due,
-      registration,
-      congress_opening,
-      congress_closing,
-    } = req.body; // Les nouvelles dates envoyées dans le corps de la requête
-
-    // Recherche de l'enregistrement correspondant à la conférence
-    const importantDates = await ImportantDates.findOne({
+    const { conference_id } = req.params;
+    const updated = await ImportantDates.update(req.body, {
       where: { conference_id },
     });
 
-    if (!importantDates) {
+    if (updated[0] === 0) {
       return res
         .status(404)
         .json({ message: "Important dates not found for this conference" });
     }
 
-    // Mise à jour des dates importantes
-    importantDates.initial_submission_due = initial_submission_due;
-    importantDates.paper_decision_notification = paper_decision_notification;
-    importantDates.final_submission_due = final_submission_due;
-    importantDates.registration = registration;
-    importantDates.congress_opening = congress_opening;
-    importantDates.congress_closing = congress_closing;
-
-    // Sauvegarde de l'enregistrement mis à jour
-    await importantDates.save();
-
     return res.status(200).json({
       message: "Important dates updated successfully",
-      importantDates,
     });
   } catch (error) {
     console.error(error);
@@ -79,18 +111,12 @@ exports.updateImportantDates = async (req, res) => {
   }
 };
 
+// Supprime les dates importantes d'une conférence
 exports.deleteImportantDates = async (req, res) => {
   try {
-    const { conference_id } = req.params; // L'ID de la conférence passé dans l'URL
+    const { conference_id } = req.params;
+    const deleted = await ImportantDates.destroy({ where: { conference_id } });
 
-    // Suppression de l'enregistrement de dates importantes pour une conférence donnée
-    const deleted = await ImportantDates.destroy({
-      where: {
-        conference_id: conference_id, // On cherche l'enregistrement avec cet ID de conférence
-      },
-    });
-
-    // Si aucune ligne n'a été supprimée, cela signifie que l'élément n'existe pas
     if (deleted === 0) {
       return res
         .status(404)

@@ -1,19 +1,26 @@
-const { Topic } = require("../models");
-const { Content } = require("../models");
+const { Topic, Content } = require("../models");
+
+// ========================== Récupération des données ========================== //
+
+exports.getTopicData = async (conference_id) => {
+  return await Topic.findAll({
+    where: { conference_id },
+    include: [
+      {
+        model: Content,
+        as: "contents",
+        attributes: ["text"],
+      },
+    ],
+  });
+};
+
+// ========================== Routes HTTP ========================== //
 
 exports.getAllTopicsWithContent = async (req, res) => {
   try {
-    const topics = await Topic.findAll({
-      include: [
-        {
-          model: Content,
-          as: "contents",
-          attributes: ["text"],
-        },
-      ],
-    });
+    const topics = await exports.getTopicData();
 
-    // Reformater les données pour correspondre à la structure demandée
     const formattedTopics = topics.map((topic) => ({
       id: topic.id,
       conference_id: topic.conference_id,
@@ -27,115 +34,129 @@ exports.getAllTopicsWithContent = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
+
 exports.createTopicWithContent = async (req, res) => {
-  const { title, conference_id, contents } = req.body; // `contents` est un tableau de strings optionnel
+  const { title, conference_id, contents = [] } = req.body;
 
   try {
-    // Création du topic
-    const topic = await Topic.create({ title, conference_id });
+    // Transaction pour garantir la cohérence des données
+    const result = await Topic.sequelize.transaction(async (t) => {
+      const topic = await Topic.create(
+        { title, conference_id },
+        { transaction: t }
+      );
 
-    // Si des contents sont fournis, les créer et les associer au topic
-    if (contents && contents.length > 0) {
       const contentData = contents.map((contentText) => ({
         text: contentText,
         topic_id: topic.id,
       }));
 
-      await Content.bulkCreate(contentData);
-    }
+      await Content.bulkCreate(contentData, { transaction: t });
 
-    // Réponse avec l'ID du topic et ses contents
+      return topic;
+    });
+
     res.status(201).json({
       message: "Topic successfully created!",
-      id: topic.id,
-      conference_id: topic.conference_id,
-      title: topic.title,
-      contents: contents || [],
+      id: result.id,
+      conference_id: result.conference_id,
+      title: result.title,
+      contents,
     });
   } catch (error) {
     console.error("Error creating topic:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 exports.deleteTopic = async (req, res) => {
   try {
     const { id } = req.params;
-
-    const deleted = await Topic.destroy({
-      where: {
-        id: id,
-      },
-    });
+    const deleted = await Topic.destroy({ where: { id } });
 
     if (deleted === 0) {
       return res.status(404).json({ message: "Topic not found" });
     }
 
-    return res.status(200).json({ message: "Topic deleted successfully" });
+    res.status(200).json({ message: "Topic deleted successfully" });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({
-      message: "An error occurred while deleting the topic" + error.message,
-    });
+    res
+      .status(500)
+      .json({ message: "An error occurred while deleting the topic" });
   }
 };
 
 exports.updateTopicWithContent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, content } = req.body; // Le contenu doit être un tableau ou un seul objet selon ce que tu veux faire
+    const { title, content = [] } = req.body;
 
-    // 1. Trouver le topic
     const topic = await Topic.findOne({ where: { id } });
 
     if (!topic) {
       return res.status(404).json({ message: "Topic not found" });
     }
 
-    // 2. Mise à jour du titre du topic
-    topic.title = title;
+    // Transaction pour garantir que la mise à jour soit cohérente
+    await Topic.sequelize.transaction(async (t) => {
+      // Mise à jour du titre
+      topic.title = title || topic.title;
+      await topic.save({ transaction: t });
 
-    // 3. Mise à jour du content si il y a des données dans le body
-    if (content && Array.isArray(content)) {
-      // Si "content" est un tableau, on veut gérer les content existants et en ajouter de nouveaux
+      // Mise à jour du contenu
+      const existingContents = await topic.getContents({ transaction: t });
 
-      // Récupérer tous les contents existants pour ce topic
-      const existingContents = await topic.getContents();
-
-      // 3.1 Supprimer les contents qui ne sont plus dans le tableau "content"
+      // Supprimer les contenus qui ne sont plus dans le tableau
       const contentToDelete = existingContents.filter(
         (existingContent) => !content.includes(existingContent.text)
       );
 
       for (const contentToRemove of contentToDelete) {
-        await contentToRemove.destroy(); // Supprimer les contenus qui ne sont plus associés
+        await contentToRemove.destroy({ transaction: t });
       }
 
-      // 3.2 Ajouter les nouveaux contents qui ne sont pas encore dans la base
+      // Ajouter les nouveaux contenus
       for (const text of content) {
-        // Vérifie si ce contenu existe déjà pour ce topic
-        const existingContent = existingContents.find(
-          (existingContent) => existingContent.text === text
-        );
-
+        const existingContent = existingContents.find((ec) => ec.text === text);
         if (!existingContent) {
-          // Créer un nouveau contenu si ce n'est pas trouvé
-          await Content.create({ text, topic_id: topic.id });
+          await Content.create(
+            { text, topic_id: topic.id },
+            { transaction: t }
+          );
         }
       }
-    }
-
-    // Sauvegarde du topic après mise à jour
-    await topic.save();
-
-    return res.status(200).json({
-      message: "Topic updated successfully",
-      topic,
     });
+
+    res.status(200).json({ message: "Topic updated successfully", topic });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({
-      message: "An error occurred while updating the topic",
-    });
+    res
+      .status(500)
+      .json({ message: "An error occurred while updating the topic" });
+  }
+};
+
+exports.getCurrentTopicsWithContent = async (req, res) => {
+  try {
+    const { conference_id } = req.params;
+    const topics = await exports.getTopicData(conference_id);
+
+    if (topics.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No topics found for this conference" });
+    }
+
+    const formattedTopics = topics.map((topic) => ({
+      id: topic.id,
+      conference_id: topic.conference_id,
+      title: topic.title,
+      content: topic.contents.map((c) => c.text),
+    }));
+
+    res.status(200).json(formattedTopics);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

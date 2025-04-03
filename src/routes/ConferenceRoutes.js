@@ -1,9 +1,26 @@
 const express = require("express");
 const router = express.Router();
 const ConferenceController = require("../controllers/ConferenceController");
+const authenticateAdmin = require("../middleware/authenticateAdmin");
 
 router.get("/", ConferenceController.getAllConferences);
+router.get("/current", ConferenceController.getCurrentConference);
 router.get("/:id", ConferenceController.getConferenceById);
-router.post("/", ConferenceController.createConference);
+router.post("/", authenticateAdmin, ConferenceController.createConference);
+router.put(
+  "/update/:id",
+  authenticateAdmin,
+  ConferenceController.updateConference
+);
+router.put(
+  "/:id/setCurrent",
+  authenticateAdmin,
+  ConferenceController.setCurrentConference
+);
+router.delete(
+  "/delete/:id",
+  authenticateAdmin,
+  ConferenceController.deleteConference
+);
 
 module.exports = router;

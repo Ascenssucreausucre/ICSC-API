@@ -24,61 +24,75 @@ exports.createArticle = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// Méthode Data pour récupérer tous les articles
+exports.findAllArticlesData = async () => {
+  return await Article.findAll({
+    include: {
+      model: Author,
+      as: "authors", // Assurez-vous que l'alias "authors" est correct
+    },
+  });
+};
+
+exports.findArticlesByConference = async (conference_id) => {
+  return await Article.findAll({
+    where: { conference_id },
+  });
+};
+
+// Endpoint HTTP pour récupérer tous les articles
 exports.findAllArticles = async (req, res) => {
   try {
-    const allArticles = await Article.findAll({
-      include: {
-        model: Author,
-        as: "authors", // Assurez-vous que l'alias "authors" est correct
-      },
-    });
-
+    const allArticles = await exports.findAllArticlesData();
     res.status(200).json(allArticles);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// Méthode Data pour trouver les articles par auteur
+exports.findArticleByAuthorData = async (authorId) => {
+  // Trouver tous les articles associés à cet auteur
+  const articles = await Article.findAll({
+    include: {
+      model: Author,
+      as: "authors", // Assurez-vous que l'alias est bien "authors"
+      where: { id: authorId }, // Filtrer les articles où l'auteur correspond à l'ID
+      required: true, // Cela assure qu'on ne récupère que les articles ayant cet auteur
+    },
+  });
+
+  // Si aucun article n'est trouvé pour cet auteur
+  if (articles.length === 0) {
+    const error = new Error("No articles found for this author");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Rechercher tous les auteurs associés à chaque article
+  const articlesWithAllAuthors = await Promise.all(
+    articles.map(async (article) => {
+      return await Article.findByPk(article.id, {
+        include: {
+          model: Author,
+          as: "authors", // Inclure tous les auteurs de l'article
+        },
+      });
+    })
+  );
+
+  return articlesWithAllAuthors;
+};
+
+// Endpoint HTTP pour trouver les articles par auteur
 exports.findArticleByAuthor = async (req, res) => {
   try {
-    const { authorId } = req.params; // Récupérer l'ID de l'auteur à partir des paramètres de la requête
-
-    // Trouver tous les articles associés à cet auteur
-    const articles = await Article.findAll({
-      include: {
-        model: Author,
-        as: "authors", // Assurez-vous que l'alias est bien "authors"
-        where: { id: authorId }, // Filtrer les articles où l'auteur correspond à l'ID
-        required: true, // Cela assure qu'on ne récupère que les articles ayant cet auteur
-      },
-    });
-
-    // Si aucun article n'est trouvé pour cet auteur
-    if (articles.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No articles found for this author" });
-    }
-
-    // Sinon, on renvoie la liste d'articles avec tous les auteurs associés
-    const articlesWithAllAuthors = await Promise.all(
-      articles.map(async (article) => {
-        // Rechercher tous les auteurs associés à chaque article
-        const fullArticle = await Article.findByPk(article.id, {
-          include: {
-            model: Author,
-            as: "authors", // Inclure tous les auteurs de l'article
-          },
-        });
-        return fullArticle;
-      })
-    );
-
-    // Renvoi de la liste des articles avec tous les auteurs associés
-    res.status(200).json(articlesWithAllAuthors);
+    const { authorId } = req.params;
+    const articles = await exports.findArticleByAuthorData(authorId);
+    res.status(200).json(articles);
   } catch (error) {
-    console.error("Error finding articles by author:", error);
-    res.status(500).json({ error: error.message });
+    res.status(error.statusCode || 500).json({ error: error.message });
   }
 };
 

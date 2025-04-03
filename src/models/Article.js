@@ -8,6 +8,14 @@ module.exports = (sequelize) => {
       title: { type: DataTypes.STRING, allowNull: false },
       affiliation: { type: DataTypes.STRING, allowNull: false },
       accepted: { type: DataTypes.TINYINT, allowNull: false, defaultValue: 0 },
+      conference_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Conferences",
+          key: "id",
+        },
+      },
     },
     {
       tableName: "articles",
@@ -23,6 +31,11 @@ module.exports = (sequelize) => {
       otherKey: "author_id",
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
+    });
+    Article.belongsTo(models.Conference, {
+      foreignKey: "conference_id",
+      as: "conference",
+      onDelete: "CASCADE",
     });
   };
 

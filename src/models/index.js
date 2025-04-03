@@ -32,6 +32,14 @@ models.Conference.hasMany(models.News, {
   foreignKey: "conference_id",
   as: "news",
 });
+models.Conference.hasMany(models.Article, {
+  foreignKey: "conference_id",
+  as: "articles",
+});
+models.Conference.hasMany(models.Committee, {
+  foreignKey: "conference_id",
+  as: "committee",
+});
 
 models.Conference.hasOne(models.ImportantDates, {
   foreignKey: "conference_id",

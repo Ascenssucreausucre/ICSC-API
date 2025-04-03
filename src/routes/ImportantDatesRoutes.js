@@ -1,16 +1,30 @@
 const express = require("express");
 const router = express.Router();
 const ImportantDatesController = require("../controllers/ImportantDatesController");
+const getCurrentConference = require("../middleware/getCurrentConference");
+const authenticateAdmin = require("../middleware/authenticateAdmin");
 
 router.get("/", ImportantDatesController.getAllImportantDates);
-router.get("/:id", ImportantDatesController.getImportantDatesById);
-router.post("/", ImportantDatesController.createImportantDate);
+router.get("/dates/:id", ImportantDatesController.getImportantDatesById);
+router.get(
+  "/current",
+  getCurrentConference,
+  ImportantDatesController.getCurrentImportantDates
+);
+router.post(
+  "/",
+  authenticateAdmin,
+  getCurrentConference,
+  ImportantDatesController.createImportantDate
+);
 router.put(
   "/update/:conference_id",
+  authenticateAdmin,
   ImportantDatesController.updateImportantDates
 );
 router.delete(
   "/delete/:conference_id",
+  authenticateAdmin,
   ImportantDatesController.deleteImportantDates
 );
 

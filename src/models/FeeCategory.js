@@ -16,7 +16,7 @@ module.exports = (sequelize) => {
       type: { type: DataTypes.STRING, allowNull: false },
       ieee_member: { type: DataTypes.DECIMAL, allowNull: false },
       non_ieee_member: { type: DataTypes.DECIMAL, allowNull: false },
-      virtual_attendance: { type: DataTypes.DECIMAL, allowNull: false },
+      virtual_attendance: { type: DataTypes.DECIMAL },
     },
     {
       tableName: "feecategories",
