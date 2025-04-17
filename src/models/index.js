@@ -46,4 +46,19 @@ models.Conference.hasOne(models.ImportantDates, {
   as: "importantDates",
 });
 
+models.Conference.hasMany(models.SpecialSession, {
+  foreignKey: "conference_id",
+  as: "specialSessions",
+});
+
+models.Conference.hasMany(models.Workshop, {
+  foreignKey: "conference_id",
+  as: "workshops",
+});
+
+models.Conference.hasMany(models.LocalInformation, {
+  foreignKey: "conference_id",
+  as: "localInfomations",
+});
+
 module.exports = models;

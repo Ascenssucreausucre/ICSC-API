@@ -10,14 +10,40 @@ router.post(
   CommitteeMemberController.createCommitteeMember
 );
 
+// Créer des membres de comité
+router.post(
+  "/bulk",
+  authenticateAdmin,
+  CommitteeMemberController.createCommitteeMembers
+);
+
 // Récupérer un membre par son ID
 router.get("/:id", CommitteeMemberController.getMemberById);
+
+router.get("/", CommitteeMemberController.getExistingCommitteeMembers);
+
+router.get("/members-to-clear", CommitteeMemberController.getMembersToClear);
 
 // Mettre à jour le rôle d'un membre dans un comité
 router.put(
   "/update-role",
   authenticateAdmin,
   CommitteeMemberController.updateMemberRole
+);
+router.put(
+  "/update-roles",
+  authenticateAdmin,
+  CommitteeMemberController.updateMemberRoles
+);
+router.put(
+  "/update-member/:id",
+  authenticateAdmin,
+  CommitteeMemberController.updateMember
+);
+router.put(
+  "/update-members",
+  authenticateAdmin,
+  CommitteeMemberController.updateMembers
 );
 
 // Récupérer tous les membres d'un comité
@@ -45,6 +71,11 @@ router.delete(
   "/delete/:id",
   authenticateAdmin,
   CommitteeMemberController.deleteMember
+);
+router.delete(
+  "/members-to-clear",
+  authenticateAdmin,
+  CommitteeMemberController.clearMembers
 );
 
 module.exports = router;

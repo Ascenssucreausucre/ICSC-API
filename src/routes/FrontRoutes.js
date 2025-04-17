@@ -29,7 +29,7 @@ router.get("/homepage-data", getCurrentConference, async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching homepage data:", error);
-    res.status(error.statusCode || 500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ error: error.message });
   }
 });
 
@@ -41,14 +41,16 @@ router.get("/navbar-data", getCurrentConference, async (req, res) => {
       await ImportantDatesController.getCurrentImportantDatesData(
         req.params.conference_id
       ); // Assure-toi que tu passes un ID valide pour la conférence si nécessaire
+    const newsData = await NewsController.getNewsByTimeStampData();
 
     res.status(200).json({
       conferenceData,
       importantDatesData,
+      newsData,
     });
   } catch (error) {
     console.error("Error fetching homepage data:", error);
-    res.status(error.statusCode || 500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ error: error.message });
   }
 });
 router.get(
@@ -63,10 +65,12 @@ router.get("/get-everything-by-conference/:id", async (req, res) => {
     const conferenceData = await ConferenceController.getConferenceByIdData(id);
     if (!conferenceData) {
       res.status(404).json({
-        message: "No conference found",
+        error: "No conference found",
       });
     }
-    const articlesData = await ArticleController.findArticlesByConference(id);
+    const articlesData = await ArticleController.findArticlesByConferenceData(
+      id
+    );
     const committeeData = await CommitteeController.getCurrentCommitteesData(
       id
     );
@@ -101,8 +105,30 @@ router.get("/get-everything-by-conference/:id", async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching homepage data:", error);
-    res.status(error.statusCode || 500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ error: error.message });
   }
 });
+
+router.get(
+  "/registration-fees/current",
+  getCurrentConference,
+  async (req, res) => {
+    try {
+      const fees =
+        await RegistrationFeeController.getCurrentRegistrationFeesWithCategoriesData(
+          req.params.conference_id
+        );
+      const dates = await ImportantDatesController.getCurrentImportantDatesData(
+        req.params.conference_id
+      );
+      res.status(200).json({
+        importantDates: dates,
+        registrationFees: fees,
+      });
+    } catch (error) {
+      res.status(error.statusCode || 500).json({ error: error.message });
+    }
+  }
+);
 
 module.exports = router;

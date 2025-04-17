@@ -5,20 +5,73 @@ module.exports = (sequelize) => {
     "ImportantDates",
     {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-      initial_submission_due: { type: DataTypes.DATE, allowNull: false },
-      paper_decision_notification: { type: DataTypes.DATE, allowNull: false },
-      final_submission_due: { type: DataTypes.DATE, allowNull: false },
-      registration: { type: DataTypes.DATE, allowNull: false },
-      congress_opening: { type: DataTypes.DATE, allowNull: false },
-      congress_closing: { type: DataTypes.DATE, allowNull: false },
+
+      initial_submission_due: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          isDate: { msg: "Initial submission due must be a valid date." },
+        },
+      },
+
+      paper_decision_notification: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          isDate: { msg: "Paper decision notification must be a valid date." },
+        },
+      },
+
+      final_submission_due: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          isDate: { msg: "Final submission due must be a valid date." },
+        },
+      },
+
+      registration: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          isDate: { msg: "Registration must be a valid date." },
+        },
+      },
+
+      congress_opening: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          isDate: { msg: "Congress opening must be a valid date." },
+        },
+      },
+
+      congress_closing: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          isDate: { msg: "Congress closing must be a valid date." },
+          isAfterOpening(value) {
+            if (
+              this.congress_opening &&
+              new Date(value) <= new Date(this.congress_opening)
+            ) {
+              throw new Error(
+                "Congress closing must be after congress opening."
+              );
+            }
+          },
+        },
+      },
+
       conference_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "Conferences", // Référence à la table Conferences
+          model: "Conferences",
           key: "id",
         },
-        unique: true, // Assurer qu'il n'y a qu'un seul enregistrement ImportantDates par conférence
+        unique: true,
       },
     },
     {
@@ -27,7 +80,6 @@ module.exports = (sequelize) => {
     }
   );
 
-  // Définir la relation avec Conference (une conférence a une seule entrée ImportantDates)
   ImportantDates.associate = (models) => {
     ImportantDates.belongsTo(models.Conference, {
       foreignKey: "conference_id",

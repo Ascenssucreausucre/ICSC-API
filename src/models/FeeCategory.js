@@ -13,10 +13,50 @@ module.exports = (sequelize) => {
           key: "id",
         },
       },
-      type: { type: DataTypes.STRING, allowNull: false },
-      ieee_member: { type: DataTypes.DECIMAL, allowNull: false },
-      non_ieee_member: { type: DataTypes.DECIMAL, allowNull: false },
-      virtual_attendance: { type: DataTypes.DECIMAL },
+      type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: { msg: "Fee category's type cannot be empty." },
+        },
+      },
+      ieee_member: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        validate: {
+          notEmpty: { msg: "IEEE Member's fee can't be null" },
+          isDecimal: { msg: "IEEE Member's fee must be a valid number." },
+          min: {
+            args: [0],
+            msg: "IEEE Member's fee must be a positive number.",
+          },
+        },
+      },
+      non_ieee_member: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        validate: {
+          notEmpty: { msg: "Non-IEEE Member's fee can't be null" },
+          isDecimal: { msg: "Non-IEEE Member's fee must be a valid number." },
+          min: {
+            args: [0],
+            msg: "Non-IEEE Member's fee must be a positive number.",
+          },
+        },
+      },
+      virtual_attendance: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+        validate: {
+          isDecimal: {
+            msg: "Virtual attendance fee must be a valid number.",
+          },
+          min: {
+            args: [0],
+            msg: "Virtual attendance fee must be a positive number.",
+          },
+        },
+      },
     },
     {
       tableName: "feecategories",

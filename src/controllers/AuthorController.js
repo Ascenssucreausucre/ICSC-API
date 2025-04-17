@@ -16,7 +16,7 @@ exports.createAuthor = async (req, res) => {
     const newAuthor = await Author.create(req.body);
     res.status(201).json({
       message: "Author successfully created",
-      id: newAuthor.id,
+      newItem: newAuthor,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -32,7 +32,7 @@ exports.updateAuthor = async (req, res) => {
     });
 
     if (!authorToUpdate) {
-      return res.status(404).json({ message: "Author not found" });
+      return res.status(404).json({ error: "Author not found" });
     }
 
     authorToUpdate.name = authorData.name || authorToUpdate.name;
@@ -63,7 +63,7 @@ exports.deleteAuthor = async (req, res) => {
       });
     } else {
       res.status(404).json({
-        message: "Author not found",
+        error: "Author not found",
       });
     }
   } catch (error) {

@@ -55,7 +55,7 @@ exports.getAllRegistrationFeesWithCategories = async (req, res) => {
       "Erreur lors de la récupération des frais d'inscription :",
       error
     );
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ error: "Erreur serveur" });
   }
 };
 
@@ -71,13 +71,13 @@ exports.getCurrentRegistrationFeesWithCategories = async (req, res) => {
       "Erreur lors de la récupération des frais d'inscription :",
       error
     );
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ error: "Erreur serveur" });
   }
 };
 
 // Créer un frais d'inscription avec ses catégories
 exports.createRegistrationFeeWithCategories = async (req, res) => {
-  const { description, conference_id, feeCategories } = req.body;
+  const { description, conference_id, feecategories } = req.body;
 
   try {
     const registrationFee = await RegistrationFee.create({
@@ -85,12 +85,15 @@ exports.createRegistrationFeeWithCategories = async (req, res) => {
       conference_id,
     });
 
-    if (feeCategories?.length) {
-      const feeCategoryData = feeCategories.map((category) => ({
+    if (feecategories?.length) {
+      const feeCategoryData = feecategories.map((category) => ({
         type: category.type,
-        ieee_member: category.ieeeMember,
-        non_ieee_member: category.nonIeeeMember,
-        virtual_attendance: category.virtualAttendance,
+        ieee_member: category.ieee_member,
+        non_ieee_member: category.non_ieee_member,
+        virtual_attendance:
+          category.virtual_attendance === ""
+            ? null
+            : category.virtual_attendance,
         registration_fee_id: registrationFee.id,
       }));
       await FeeCategory.bulkCreate(feeCategoryData);
@@ -98,8 +101,10 @@ exports.createRegistrationFeeWithCategories = async (req, res) => {
 
     res.status(201).json({
       message: "Frais d'inscription créé avec succès!",
-      id: registrationFee.id,
-      feeCategories: feeCategories || [],
+      newItem: {
+        ...registrationFee.dataValues,
+        feecategories: feecategories || [],
+      },
     });
   } catch (error) {
     console.error(
@@ -113,54 +118,72 @@ exports.createRegistrationFeeWithCategories = async (req, res) => {
 // Mettre à jour un frais d'inscription avec ses catégories
 exports.updateRegistrationFeeWithCategories = async (req, res) => {
   const { id } = req.params;
-  const { description, feeCategories } = req.body;
+  const { description, feecategories } = req.body;
 
   try {
     const registrationFee = await RegistrationFee.findByPk(id);
     if (!registrationFee) {
-      return res
-        .status(404)
-        .json({ message: "Frais d'inscription non trouvé" });
+      return res.status(404).json({ error: "No registration fee found" });
     }
 
+    // Mise à jour de la description
     await registrationFee.update({ description });
 
-    if (feeCategories?.length) {
+    if (Array.isArray(feecategories)) {
+      // Récupérer toutes les catégories existantes
       const existingCategories = await FeeCategory.findAll({
         where: { registration_fee_id: id },
       });
 
-      // Suppression des catégories qui ne sont plus dans la liste
-      const existingTypes = existingCategories.map((cat) => cat.type);
-      const newTypes = feeCategories.map((cat) => cat.type);
-      const categoriesToDelete = existingTypes.filter(
-        (type) => !newTypes.includes(type)
-      );
+      const incomingIds = feecategories
+        .filter((cat) => cat.id) // on prend les catégories avec un id
+        .map((cat) => cat.id);
 
-      if (categoriesToDelete.length) {
+      // Supprimer les catégories qui ne sont plus présentes dans la nouvelle liste
+      const toDelete = existingCategories.filter(
+        (cat) => !incomingIds.includes(cat.id)
+      );
+      if (toDelete.length) {
         await FeeCategory.destroy({
-          where: { registration_fee_id: id, type: categoriesToDelete },
+          where: {
+            id: toDelete.map((cat) => cat.id),
+          },
         });
       }
 
-      // Ajout/Mise à jour des nouvelles catégories
-      for (const category of feeCategories) {
-        await FeeCategory.upsert({
-          registration_fee_id: id,
-          type: category.type,
-          ieee_member: category.ieeeMember,
-          non_ieee_member: category.nonIeeeMember,
-          virtual_attendance: category.virtualAttendance,
-        });
+      // Traiter les nouvelles données : update ou create
+      for (const category of feecategories) {
+        if (category.id) {
+          // Update si l'id est présent
+          await FeeCategory.update(
+            {
+              type: category.type,
+              ieee_member: category.ieee_member,
+              non_ieee_member: category.non_ieee_member,
+              virtual_attendance: category.virtual_attendance,
+            },
+            { where: { id: category.id, registration_fee_id: id } }
+          );
+        } else {
+          // Create si pas d'id
+          await FeeCategory.create({
+            type: category.type,
+            ieee_member: category.ieee_member,
+            non_ieee_member: category.non_ieee_member,
+            virtual_attendance:
+              category.virtual_attendance === ""
+                ? null
+                : category.virtual_attendance,
+            registration_fee_id: id,
+          });
+        }
       }
     }
 
-    res
-      .status(200)
-      .json({ message: "Frais d'inscription mis à jour avec succès" });
+    res.status(200).json({ message: "Registration fee updated successfully." });
   } catch (error) {
-    console.error("Erreur lors de la mise à jour :", error);
-    res.status(500).json({ message: "Erreur serveur" });
+    console.error("Error while updating :", error);
+    res.status(500).json({ error: "Internal error" });
   }
 };
 
@@ -181,6 +204,6 @@ exports.deleteRegistrationFee = async (req, res) => {
       .json({ message: "Frais d'inscription supprimé avec succès" });
   } catch (error) {
     console.error("Erreur lors de la suppression :", error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ error: "Erreur serveur" });
   }
 };

@@ -13,7 +13,15 @@ module.exports = (sequelize) => {
           key: "id",
         },
       },
-      description: { type: DataTypes.STRING, allowNull: false },
+      description: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Registration Fee's description/country cannot be empty.",
+          },
+        },
+      },
     },
     {
       tableName: "registrationfees", // Assurez-vous que le nom de la table correspond à la BDD (en minuscule ici)

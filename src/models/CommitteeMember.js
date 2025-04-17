@@ -5,9 +5,25 @@ module.exports = (sequelize) => {
     "CommitteeMember",
     {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-      name: { type: DataTypes.STRING },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Name can't be empty. If the committee member has only one name, fill the 'Name' input instead.",
+          },
+        },
+      },
       surname: { type: DataTypes.STRING },
-      affiliation: { type: DataTypes.STRING, allowNull: false },
+      affiliation: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Affiliation can't be null. Fill in the committee member's country if 'affiliation' remains unclear.",
+          },
+        },
+      },
     },
     {
       tableName: "committeemembers",

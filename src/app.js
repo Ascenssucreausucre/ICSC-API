@@ -52,7 +52,7 @@ app.use("/api/front-routes", FrontRoutes);
 
 // Synchronisation avec la base de données
 sequelize
-  .sync()
+  .sync({ alter: true })
   .then(() => console.log("Base de données synchronisée."))
   .catch((err) => console.error("Erreur de synchronisation :", err));
 

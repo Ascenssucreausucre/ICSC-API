@@ -7,7 +7,7 @@ module.exports = (sequelize) => {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
       committee_id: { type: DataTypes.INTEGER, allowNull: false },
       member_id: { type: DataTypes.INTEGER, allowNull: false },
-      title: { type: DataTypes.STRING, allowNull: true }, // Le titre du membre dans ce comité
+      title: { type: DataTypes.STRING, allowNull: true },
     },
     {
       tableName: "committeeroles",

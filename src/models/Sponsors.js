@@ -5,16 +5,23 @@ module.exports = (sequelize) => {
     "Sponsor",
     {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-      name: { type: DataTypes.STRING, allowNull: false },
-      icon: {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: { notEmpty: { msg: "Sponsor's name can't be empty." } },
+      },
+      image: {
         type: DataTypes.STRING,
         allowNull: false,
         get() {
-          const rawValue = this.getDataValue("icon");
-          return rawValue ? `/uploads/${rawValue}` : null; // Chemin d'accès à l'image
+          return this.getDataValue("image");
         },
       },
-      type: { type: DataTypes.STRING, allowNull: false },
+      type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: { notEmpty: { msg: "Sponsor's type can't be empty." } },
+      },
       conference_id: {
         type: DataTypes.INTEGER,
         allowNull: false,

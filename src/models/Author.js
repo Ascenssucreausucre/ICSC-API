@@ -7,7 +7,9 @@ module.exports = (sequelize) => {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
       name: { type: DataTypes.STRING, allowNull: false },
       surname: { type: DataTypes.STRING, allowNull: false },
-      country: { type: DataTypes.TEXT, allowNull: false },
+      country: { type: DataTypes.STRING, allowNull: false },
+      affiliation: { type: DataTypes.STRING, allowNull: false },
+      title: { type: DataTypes.STRING, allowNull: false },
     },
     {
       tableName: "authors",
@@ -20,6 +22,15 @@ module.exports = (sequelize) => {
       as: "articles",
       foreignKey: "author_id",
       otherKey: "article_id",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+
+    Author.belongsToMany(models.SpecialSession, {
+      through: "specialsessionauthors",
+      as: "specialsessions",
+      foreignKey: "author_id",
+      otherKey: "special_session_id",
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     });

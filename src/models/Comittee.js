@@ -5,7 +5,13 @@ module.exports = (sequelize) => {
     "Committee",
     {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-      type: { type: DataTypes.STRING, allowNull: false },
+      type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: { msg: "Committee type can't be empty." },
+        },
+      },
       conference_id: { type: DataTypes.INTEGER, allowNull: false },
     },
     {

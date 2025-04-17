@@ -14,12 +14,12 @@ exports.login = async (req, res) => {
     const admin = await Admin.findOne({ where: { email } });
 
     if (!admin) {
-      return res.status(404).json({ message: "Admin not found" });
+      return res.status(404).json({ error: "Admin not found" });
     }
 
     const validPassword = await bcrypt.compare(password, admin.password);
     if (!validPassword) {
-      return res.status(401).json({ message: "Invalid password" });
+      return res.status(401).json({ error: "Invalid password" });
     }
 
     // Générer un JWT
@@ -38,7 +38,7 @@ exports.login = async (req, res) => {
     res.status(200).json({ message: "Login successful" });
   } catch (error) {
     console.error("Error during login:", error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 

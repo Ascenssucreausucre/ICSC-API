@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const { ImportantDates } = require("../models");
 
 // ====================== MÉTHODES "DATA" ====================== //
@@ -51,7 +52,7 @@ exports.getImportantDatesById = async (req, res) => {
     const dates = await exports.getImportantDatesByIdData(id);
 
     if (!dates) {
-      return res.status(404).json({ message: "Dates non trouvées" });
+      return res.status(404).json({ error: "Dates non trouvées" });
     }
 
     res.status(200).json(dates);
@@ -76,10 +77,20 @@ exports.getCurrentImportantDates = async (req, res) => {
 // Crée une date importante
 exports.createImportantDate = async (req, res) => {
   try {
+    const { conference_id } = req.body;
+    const existing = await ImportantDates.findOne({
+      where: { conference_id },
+    });
+    if (existing) {
+      return res.status(401).json({
+        error:
+          "Important dates already added for this conference. Please use the update function instead.",
+      });
+    }
     const importantDate = await ImportantDates.create(req.body);
     res.status(201).json({
       message: "Dates successfully added",
-      id: importantDate.id,
+      newItem: importantDate,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -94,10 +105,10 @@ exports.updateImportantDates = async (req, res) => {
       where: { conference_id },
     });
 
-    if (updated[0] === 0) {
+    if (!updated) {
       return res
         .status(404)
-        .json({ message: "Important dates not found for this conference" });
+        .json({ error: "Important dates not found for this conference" });
     }
 
     return res.status(200).json({
@@ -106,7 +117,7 @@ exports.updateImportantDates = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      message: "An error occurred while updating the important dates",
+      error: "An error occurred while updating the important dates",
     });
   }
 };
@@ -120,7 +131,7 @@ exports.deleteImportantDates = async (req, res) => {
     if (deleted === 0) {
       return res
         .status(404)
-        .json({ message: "Important dates not found for this conference" });
+        .json({ error: "Important dates not found for this conference" });
     }
 
     return res
@@ -129,7 +140,7 @@ exports.deleteImportantDates = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      message: "An error occurred while deleting the important dates",
+      error: "An error occurred while deleting the important dates",
     });
   }
 };

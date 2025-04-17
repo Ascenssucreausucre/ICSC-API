@@ -6,9 +6,7 @@ const authenticateAdmin = (req, res, next) => {
   const token = req.cookies?.token; // 🔥 Récupère le token depuis les cookies
 
   if (!token) {
-    return res
-      .status(403)
-      .json({ message: "Access denied. No token provided." });
+    return res.status(403).json({ error: "Access denied. No token provided." });
   }
 
   try {
@@ -20,12 +18,12 @@ const authenticateAdmin = (req, res, next) => {
 
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({
-        message: "Your session has expired. Please log in again.",
+        error: "Your session has expired. Please log in again.",
         expiredAt: error.expiredAt,
       });
     }
 
-    res.status(401).json({ message: "Invalid token." });
+    res.status(401).json({ error: "Invalid token." });
   }
 };
 

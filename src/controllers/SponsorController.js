@@ -1,4 +1,7 @@
 const { Sponsor, Conference } = require("../models");
+const path = require("path");
+const fs = require("fs");
+const fsp = require("fs").promises;
 const { Op } = require("sequelize");
 
 // ====================== MÉTHODES "DATA" ====================== //
@@ -45,31 +48,45 @@ exports.getSponsorsByConference = async (req, res) => {
 
 // Créer un sponsor
 exports.createSponsor = async (req, res) => {
+  const { name, type, conference_id } = req.body;
+  const image = req.file ? req.file.filename : null;
+
   try {
-    const { name, type } = req.body;
-    const { conference_id } = req.params;
-    const icon = req.file ? req.file.filename : null;
     const conference = await Conference.findByPk(conference_id);
 
     if (!conference) {
-      return res.status(404).json({ message: "Conference not found." });
+      // Supprimer l'image uploadée si la conférence est introuvable
+      if (image) {
+        await fsp.unlink(path.join("public/uploads", image));
+      }
+      return res.status(404).json({ error: "Conference not found." });
     }
-    if (!icon) {
+
+    if (!image) {
       return res.status(400).json({ error: "Image is required." });
     }
 
     const newSponsor = await Sponsor.create({
       name,
-      icon,
+      image,
       type,
       conference_id,
     });
 
     res.status(201).json({
       message: `Sponsor ${newSponsor.name} successfully created.`,
-      sponsor: newSponsor,
+      newItem: newSponsor,
     });
   } catch (error) {
+    // Supprimer l'image si une erreur s'est produite et que le fichier existe
+    if (image) {
+      try {
+        await fsp.unlink(path.join("public/uploads", image));
+      } catch (unlinkError) {
+        console.error("Error deleting uploaded file:", unlinkError);
+      }
+    }
+
     console.error("Error creating sponsor:", error);
     res.status(500).json({ error: error.message });
   }
@@ -86,17 +103,17 @@ exports.updateSponsor = async (req, res) => {
     if (!sponsor) {
       return res
         .status(404)
-        .json({ message: `No sponsor found with ID: ${id}.` });
+        .json({ error: `No sponsor found with ID: ${id}.` });
     }
 
-    let newIcon = sponsor.icon; // Garde l'ancienne image par défaut
+    let newIcon = sponsor.image; // Garde l'ancienne image par défaut
 
     if (req.file) {
       // Supprime l'ancienne image si elle existe
       const oldImagePath = path.join(
         __dirname,
         "../../public/uploads",
-        sponsor.icon
+        sponsor.image
       );
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
@@ -105,11 +122,11 @@ exports.updateSponsor = async (req, res) => {
     }
 
     // Mise à jour du sponsor
-    await sponsor.update({ name, icon: newIcon, type, conference_id });
+    await sponsor.update({ name, image: newIcon, type, conference_id });
 
     res.status(200).json({
       message: "Sponsor successfully updated.",
-      sponsor,
+      newItem: sponsor,
     });
   } catch (error) {
     console.error("Error updating sponsor:", error);
@@ -126,14 +143,14 @@ exports.deleteSponsor = async (req, res) => {
     if (!sponsor) {
       return res
         .status(404)
-        .json({ message: `No sponsor found with ID: ${id}.` });
+        .json({ error: `No sponsor found with ID: ${id}.` });
     }
 
     // Supprime l'image associée si elle existe
     const imagePath = path.join(
       __dirname,
       "../../public/uploads",
-      sponsor.icon
+      sponsor.image
     );
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);

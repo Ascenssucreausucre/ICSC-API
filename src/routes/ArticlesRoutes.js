@@ -6,6 +6,10 @@ const authenticateAdmin = require("../middleware/authenticateAdmin");
 
 router.get("/", ArticleController.findAllArticles);
 router.get("/find-by-author/:authorId", ArticleController.findArticleByAuthor);
+router.get(
+  "/find-by-conference/:conference_id",
+  ArticleController.findArticlesByConference
+);
 router.post(
   "/",
   authenticateAdmin,

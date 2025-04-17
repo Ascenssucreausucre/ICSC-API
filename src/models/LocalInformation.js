@@ -1,18 +1,31 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const Topic = sequelize.define(
-    "Topic",
+  const LocalInformation = sequelize.define(
+    "LocalInformation",
     {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
       title: {
         type: DataTypes.STRING,
         allowNull: false,
         validate: {
-          notEmpty: {
-            msg: "Title can't be empty.",
+          isEmpty: {
+            msg: "Local information's title can't be empty",
           },
         },
+      },
+      text: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        validate: {
+          isEmpty: {
+            msg: "Local information's text can't be empty",
+          },
+        },
+      },
+      file: {
+        type: DataTypes.STRING, // Nom ou chemin du fichier
+        allowNull: true,
       },
       conference_id: {
         type: DataTypes.INTEGER,
@@ -24,24 +37,18 @@ module.exports = (sequelize) => {
       },
     },
     {
-      tableName: "topics",
+      tableName: "localinformations",
       timestamps: false,
     }
   );
 
-  // Définition des relations
-  Topic.associate = (models) => {
-    Topic.belongsTo(models.Conference, {
+  LocalInformation.associate = (models) => {
+    LocalInformation.belongsTo(models.Conference, {
       foreignKey: "conference_id",
       as: "conference",
-    });
-
-    Topic.hasMany(models.Content, {
-      foreignKey: "topic_id",
-      as: "contents",
       onDelete: "CASCADE",
     });
   };
 
-  return Topic;
+  return LocalInformation;
 };

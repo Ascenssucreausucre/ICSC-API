@@ -4,6 +4,10 @@ const RegistrationFeeController = require("../controllers/RegistrationFeeControl
 const getCurrentConference = require("../middleware/getCurrentConference");
 const { authPlugins } = require("mysql2");
 const authenticateAdmin = require("../middleware/authenticateAdmin");
+const {
+  verifyRegistrationFeesWithcategories,
+  handleValidationErrors,
+} = require("../middleware/validators");
 
 router.get("/", RegistrationFeeController.getAllRegistrationFeesWithCategories);
 router.get(
@@ -14,12 +18,15 @@ router.get(
 router.post(
   "/create",
   authenticateAdmin,
-  getCurrentConference,
+  verifyRegistrationFeesWithcategories,
+  handleValidationErrors,
   RegistrationFeeController.createRegistrationFeeWithCategories
 );
 router.put(
   "/update/:id",
   authenticateAdmin,
+  verifyRegistrationFeesWithcategories,
+  handleValidationErrors,
   RegistrationFeeController.updateRegistrationFeeWithCategories
 );
 router.delete(

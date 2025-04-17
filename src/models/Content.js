@@ -5,7 +5,15 @@ module.exports = (sequelize) => {
     "Content",
     {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-      text: { type: DataTypes.STRING, allowNull: false },
+      text: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Subtopic can't be empty.",
+          },
+        },
+      },
       topic_id: {
         type: DataTypes.INTEGER,
         allowNull: false,

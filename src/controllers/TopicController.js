@@ -31,12 +31,18 @@ exports.getAllTopicsWithContent = async (req, res) => {
     res.status(200).json(formattedTopics);
   } catch (error) {
     console.error("Erreur lors de la récupération des topics :", error);
-    res.status(500).json({ message: "Erreur serveur" });
+    res.status(500).json({ error: "Erreur serveur" });
   }
 };
 
 exports.createTopicWithContent = async (req, res) => {
-  const { title, conference_id, contents = [] } = req.body;
+  const { title, conference_id, content = [] } = req.body;
+
+  if (!conference_id) {
+    return res.status(500).json({
+      error: "No conference id sent.",
+    });
+  }
 
   try {
     // Transaction pour garantir la cohérence des données
@@ -46,7 +52,7 @@ exports.createTopicWithContent = async (req, res) => {
         { transaction: t }
       );
 
-      const contentData = contents.map((contentText) => ({
+      const contentData = content.map((contentText) => ({
         text: contentText,
         topic_id: topic.id,
       }));
@@ -61,7 +67,7 @@ exports.createTopicWithContent = async (req, res) => {
       id: result.id,
       conference_id: result.conference_id,
       title: result.title,
-      contents,
+      content,
     });
   } catch (error) {
     console.error("Error creating topic:", error);
@@ -75,7 +81,7 @@ exports.deleteTopic = async (req, res) => {
     const deleted = await Topic.destroy({ where: { id } });
 
     if (deleted === 0) {
-      return res.status(404).json({ message: "Topic not found" });
+      return res.status(404).json({ error: "Topic not found" });
     }
 
     res.status(200).json({ message: "Topic deleted successfully" });
@@ -83,7 +89,7 @@ exports.deleteTopic = async (req, res) => {
     console.error(error);
     res
       .status(500)
-      .json({ message: "An error occurred while deleting the topic" });
+      .json({ error: "An error occurred while deleting the topic" });
   }
 };
 
@@ -95,7 +101,7 @@ exports.updateTopicWithContent = async (req, res) => {
     const topic = await Topic.findOne({ where: { id } });
 
     if (!topic) {
-      return res.status(404).json({ message: "Topic not found" });
+      return res.status(404).json({ error: "Topic not found" });
     }
 
     // Transaction pour garantir que la mise à jour soit cohérente
@@ -133,7 +139,7 @@ exports.updateTopicWithContent = async (req, res) => {
     console.error(error);
     res
       .status(500)
-      .json({ message: "An error occurred while updating the topic" });
+      .json({ error: "An error occurred while updating the topic" });
   }
 };
 
@@ -145,7 +151,7 @@ exports.getCurrentTopicsWithContent = async (req, res) => {
     if (topics.length === 0) {
       return res
         .status(404)
-        .json({ message: "No topics found for this conference" });
+        .json({ error: "No topics found for this conference" });
     }
 
     const formattedTopics = topics.map((topic) => ({
@@ -157,6 +163,6 @@ exports.getCurrentTopicsWithContent = async (req, res) => {
 
     res.status(200).json(formattedTopics);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ error: error.message });
   }
 };

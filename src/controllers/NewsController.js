@@ -62,7 +62,7 @@ exports.getNewsById = async (req, res) => {
     const targetedNews = await exports.getNewsByIdData(id);
 
     if (!targetedNews) {
-      return res.status(404).json({ message: "News non trouvée" });
+      return res.status(404).json({ error: "News non trouvée" });
     }
 
     res.status(200).json(targetedNews);
@@ -87,7 +87,7 @@ exports.createNews = async (req, res) => {
     const targetedNews = await News.create(req.body);
     res.status(201).json({
       message: "News créée avec succès",
-      id: targetedNews.id,
+      newItem: targetedNews,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -100,8 +100,8 @@ exports.updateNews = async (req, res) => {
     const { id } = req.params;
     const updated = await News.update(req.body, { where: { id } });
 
-    if (updated[0] === 0) {
-      return res.status(404).json({ message: "News not found" });
+    if (!updated) {
+      return res.status(404).json({ error: "News not found" });
     }
 
     res.status(200).json({
@@ -110,7 +110,7 @@ exports.updateNews = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "An error occurred while updating the news",
+      error: error.message,
     });
   }
 };
@@ -122,14 +122,14 @@ exports.deleteNewsById = async (req, res) => {
     const deleted = await News.destroy({ where: { id } });
 
     if (deleted === 0) {
-      return res.status(404).json({ message: "News not found" });
+      return res.status(404).json({ error: "News not found" });
     }
 
     return res.status(200).json({ message: "News deleted successfully" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      message: "An error occurred while deleting the news: " + error.message,
+      error: "An error occurred while deleting the news: " + error.message,
     });
   }
 };

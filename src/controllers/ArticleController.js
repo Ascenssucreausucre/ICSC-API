@@ -9,7 +9,7 @@ exports.createArticle = async (req, res) => {
 
     if (!authors || authors.length === 0) {
       return res.status(400).json({
-        message: "At least one author is required to create an article",
+        error: "At least one author is required to create an article",
       });
     }
 
@@ -30,15 +30,37 @@ exports.findAllArticlesData = async () => {
   return await Article.findAll({
     include: {
       model: Author,
-      as: "authors", // Assurez-vous que l'alias "authors" est correct
+      as: "authors",
     },
   });
 };
 
-exports.findArticlesByConference = async (conference_id) => {
+exports.findArticlesByConferenceData = async (conference_id) => {
   return await Article.findAll({
     where: { conference_id },
+    include: {
+      model: Author,
+      as: "authors",
+      through: { attributes: [] },
+    },
   });
+};
+
+exports.findArticlesByConference = async (req, res) => {
+  try {
+    const { conference_id } = req.params;
+    const Articles = await exports.findArticlesByConferenceData(conference_id);
+
+    if (Articles.length === 0) {
+      res.status(404).json({
+        error: "No article found for this conference.",
+      });
+    }
+
+    res.status(200).json(Articles);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 
 // Endpoint HTTP pour récupérer tous les articles
@@ -104,7 +126,7 @@ exports.deleteArticleById = async (req, res) => {
     });
     if (deletedArticle === 0) {
       return res.status(404).json({
-        message: "Article not found",
+        error: "Article not found",
       });
     }
     res.status(200).json({
@@ -126,7 +148,7 @@ exports.updateArticle = async (req, res) => {
     });
 
     if (!articleToUpdate) {
-      return res.status(404).json({ message: "Article not found" });
+      return res.status(404).json({ error: "Article not found" });
     }
 
     // 2️⃣ Mettre à jour les autres champs
@@ -152,9 +174,7 @@ exports.updateArticle = async (req, res) => {
 
       if (notFoundAuthors.length > 0) {
         return res.status(404).json({
-          message: `Author(s) with ID(s) ${notFoundAuthors.join(
-            ", "
-          )} not found`,
+          error: `Author(s) with ID(s) ${notFoundAuthors.join(", ")} not found`,
         });
       }
 

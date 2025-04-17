@@ -37,9 +37,21 @@ exports.getCurrentCommittees = async (req, res) => {
 
 exports.createCommittee = async (req, res) => {
   try {
-    const newCommittee = await Committee.create(req.body);
+    const { type, conference_id } = req.body;
+    if (!conference_id || typeof conference_id !== "number") {
+      return res.status(400).json({
+        error: "Conference id is either absent or wrongly formatted.",
+      });
+    }
+    if (typeof type !== "string" || type === "") {
+      return res.status(400).json({
+        error: "Either empty type or wrongly formatted.",
+      });
+    }
+    const newCommittee = await Committee.create({ type, conference_id });
     res.status(201).json({
       message: `Committee ${newCommittee.type} successfully created.`,
+      newItem: newCommittee,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -81,7 +93,7 @@ exports.getAllCommittees = async (req, res) => {
     const committees = await exports.getAllCommitteesData();
     res.status(200).json(committees);
   } catch (error) {
-    res.status(error.statusCode || 500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ error: error.message });
   }
 };
 
@@ -95,7 +107,7 @@ exports.deleteCommitte = async (req, res) => {
 
     if (committeeToDelete === 0) {
       return res.status(404).json({
-        message: `No committee found with ID: ${id}.`,
+        error: `No committee found with ID: ${id}.`,
       });
     }
     res.status(200).json({
@@ -113,7 +125,7 @@ exports.updateCommittee = async (req, res) => {
 
     if (!committeeToUpdate) {
       return res.status(404).json({
-        message: `No committee found with ID: ${id}.`,
+        error: `No committee found with ID: ${id}.`,
       });
     }
 
@@ -166,24 +178,27 @@ exports.getCommitteeById = async (req, res) => {
     res.status(200).json(committee);
   } catch (error) {
     console.error("Error fetching committee by ID:", error);
-    res.status(error.statusCode || 500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ error: error.message });
   }
 };
 
 exports.addMemberToCommittee = async (req, res) => {
   try {
-    const { committee_id, member_id, title } = req.body;
+    const { committee_id, id, name, surname, affiliation, title } = req.body;
 
+    // Vérifier ou créer le membre
+    let member = await CommitteeMember.findByPk(id);
+    if (!member) {
+      member = await CommitteeMember.create({ name, surname, affiliation });
+    }
+
+    // Vérifier l'existence du comité
     const committee = await Committee.findByPk(committee_id);
     if (!committee) {
-      return res.status(404).json({ message: "Committee not found." });
+      return res.status(404).json({ error: "Committee not found." });
     }
 
-    const member = await CommitteeMember.findByPk(member_id);
-    if (!member) {
-      return res.status(404).json({ message: "Member not found." });
-    }
-
+    // Ajouter le membre au comité avec le rôle
     await committee.addMember(member, { through: { title } });
 
     res
@@ -195,18 +210,55 @@ exports.addMemberToCommittee = async (req, res) => {
   }
 };
 
+exports.addMembersToCommittee = async (req, res) => {
+  try {
+    const { committee_id, members } = req.body; // `members` est un tableau [{ member_id, name, surname, affiliation, title }]
+
+    // Vérifier l'existence du comité
+    const committee = await Committee.findByPk(committee_id);
+    if (!committee) {
+      return res.status(404).json({ error: "Committee not found." });
+    }
+
+    // Traiter chaque membre individuellement
+    const membersToAdd = await Promise.all(
+      members.map(async ({ id, name, surname, affiliation, title }) => {
+        let member = await CommitteeMember.findByPk(id);
+        if (!member) {
+          member = await CommitteeMember.create({ name, surname, affiliation });
+        }
+        return { member, title };
+      })
+    );
+
+    // Ajouter tous les membres avec leurs rôles
+    await Promise.all(
+      membersToAdd.map(({ member, title }) =>
+        committee.addMember(member, { through: { title } })
+      )
+    );
+
+    res.status(200).json({
+      message: `${members.length} members added to committee successfully.`,
+    });
+  } catch (error) {
+    console.error("Error adding members to committee:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.removeMemberFromCommittee = async (req, res) => {
   try {
     const { committee_id, member_id } = req.body;
 
     const committee = await Committee.findByPk(committee_id);
     if (!committee) {
-      return res.status(404).json({ message: "Committee not found." });
+      return res.status(404).json({ error: "Committee not found." });
     }
 
     const member = await CommitteeMember.findByPk(member_id);
     if (!member) {
-      return res.status(404).json({ message: "Member not found." });
+      return res.status(404).json({ error: "Member not found." });
     }
 
     await committee.removeMember(member);
@@ -216,6 +268,37 @@ exports.removeMemberFromCommittee = async (req, res) => {
       .json({ message: "Member removed from committee successfully." });
   } catch (error) {
     console.error("Error removing member from committee:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.removeMembersFromCommittee = async (req, res) => {
+  try {
+    const { committee_id, member_ids } = req.body; // `member_ids` est un tableau d'IDs
+
+    // Vérifier si le comité existe
+    const committee = await Committee.findByPk(committee_id);
+    if (!committee) {
+      return res.status(404).json({ error: "Committee not found." });
+    }
+
+    // Vérifier si tous les membres existent
+    const existingMembers = await CommitteeMember.findAll({
+      where: { id: member_ids },
+    });
+
+    if (existingMembers.length !== member_ids.length) {
+      return res.status(404).json({ error: "One or more members not found." });
+    }
+
+    // Supprimer tous les membres en une seule opération
+    await committee.removeMembers(existingMembers);
+
+    res.status(200).json({
+      message: `${member_ids.length} members removed from committee successfully.`,
+    });
+  } catch (error) {
+    console.error("Error removing members from committee:", error);
     res.status(500).json({ error: error.message });
   }
 };
