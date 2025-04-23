@@ -5,9 +5,29 @@ module.exports = (sequelize) => {
     "Article",
     {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-      nr: { type: DataTypes.INTEGER, allowNull: false },
-      title: { type: DataTypes.STRING, allowNull: false },
-      affiliation: { type: DataTypes.STRING, allowNull: false },
+      nr: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: { notEmpty: { msg: "Nr can't be empty" } },
+      },
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Title can't be empty.",
+          },
+        },
+      },
+      affiliation: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Affiliation can't be null.",
+          },
+        },
+      },
       status: {
         type: DataTypes.ENUM("pending", "accepted", "rejected"),
         allowNull: false,
@@ -16,7 +36,7 @@ module.exports = (sequelize) => {
       profile: {
         type: DataTypes.ENUM("Invited", "Contributed"),
         allowNull: false,
-        defaultValue: "Invited",
+        defaultValue: "Contributed",
       },
       conference_id: {
         type: DataTypes.INTEGER,

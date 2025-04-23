@@ -9,6 +9,9 @@ const ArticleController = require("../controllers/ArticleController");
 const CommitteeController = require("../controllers/CommitteeController");
 const NewsController = require("../controllers/NewsController");
 const RegistrationFeeController = require("../controllers/RegistrationFeeController");
+const {
+  getAdditionnalFeeByConferenceData,
+} = require("../controllers/AdditionnalFeeController");
 
 router.get("/homepage-data", getCurrentConference, async (req, res) => {
   try {
@@ -78,6 +81,7 @@ router.get("/get-everything-by-conference/:id", async (req, res) => {
       await RegistrationFeeController.getCurrentRegistrationFeesWithCategoriesData(
         id
       );
+    const additionnalFees = await getAdditionnalFeeByConferenceData(id);
     const importantDatesData =
       await ImportantDatesController.getCurrentImportantDatesData(id);
     const newsData = await NewsController.getNewsByConference(id);
@@ -98,6 +102,7 @@ router.get("/get-everything-by-conference/:id", async (req, res) => {
       articles: articlesData,
       committees: committeeData,
       registrationFees: registrationFeeData,
+      additionnalFees: additionnalFees,
       importantDates: importantDatesData,
       news: newsData,
       sponsors: sponsorsData,
@@ -121,7 +126,11 @@ router.get(
       const dates = await ImportantDatesController.getCurrentImportantDatesData(
         req.params.conference_id
       );
+      const additionnalFees = await getAdditionnalFeeByConferenceData(
+        req.params.conference_id
+      );
       res.status(200).json({
+        additionnalFees,
         importantDates: dates,
         registrationFees: fees,
       });

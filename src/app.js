@@ -46,6 +46,8 @@ const AuthRoute = require("./routes/AuthRoutes");
 app.use("/api/Admin-auth", AuthRoute);
 const SponsorsRoutes = require("./routes/SponsorRoutes");
 app.use("/api/Sponsors", SponsorsRoutes);
+const AdditionnalFeeRoutes = require("./routes/AdditionnalFeeRoutes");
+app.use("/api/Additionnal-fee", AdditionnalFeeRoutes);
 
 const FrontRoutes = require("./routes/FrontRoutes");
 app.use("/api/front-routes", FrontRoutes);

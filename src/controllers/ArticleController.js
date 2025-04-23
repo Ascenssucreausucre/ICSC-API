@@ -2,25 +2,50 @@ const { Article, Author } = require("../models"); // Remplacer "../models" par l
 const { Op } = require("sequelize");
 
 exports.createArticle = async (req, res) => {
+  const { authors, ...articleData } = req.body;
+
+  if (!authors || !Array.isArray(authors) || authors.length === 0) {
+    return res.status(400).json({
+      error: "At least one valid author is required to create an article",
+    });
+  }
+
   try {
-    const { authors, ...articleData } = req.body;
+    const result = await Article.sequelize.transaction(async (t) => {
+      // Vérifie que les auteurs existent
+      const authorIds = authors.map((a) => a.id);
 
-    const newArticle = await Article.create(articleData);
-
-    if (!authors || authors.length === 0) {
-      return res.status(400).json({
-        error: "At least one author is required to create an article",
+      const existingAuthors = await Author.findAll({
+        where: { id: authorIds },
+        transaction: t,
       });
-    }
 
-    await newArticle.setAuthors(authors);
+      if (existingAuthors.length !== authors.length) {
+        throw new Error("One or more authors do not exist");
+      }
+
+      // Crée l'article
+      const newArticle = await Article.create(articleData, { transaction: t });
+
+      // Associe les auteurs
+      await newArticle.setAuthors(authorIds, { transaction: t });
+
+      return { newArticle, existingAuthors };
+    });
 
     res.status(201).json({
       message: "Article successfully created",
-      id: newArticle.id,
-      authors: authors,
+      article: {
+        id: result.newArticle.id,
+        ...articleData,
+        authors: result.existingAuthors.map((a) => ({
+          id: a.id,
+          name: a.name,
+        })),
+      },
     });
   } catch (error) {
+    console.error("Error creating article:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -142,6 +167,8 @@ exports.updateArticle = async (req, res) => {
     const { id } = req.params;
     const { title, affiliation, authors } = req.body; // `authors` est un tableau d'IDs d'auteurs
 
+    const authorsIds = authors.map((a) => a.id);
+
     // 1️⃣ Trouver l'article à mettre à jour
     const articleToUpdate = await Article.findByPk(id, {
       include: { model: Author, as: "authors" }, // Inclure les auteurs actuels
@@ -157,9 +184,9 @@ exports.updateArticle = async (req, res) => {
     await articleToUpdate.save();
 
     // 3️⃣ Mettre à jour les auteurs si renseigné
-    if (authors && Array.isArray(authors)) {
+    if (authorsIds && Array.isArray(authorsIds)) {
       const currentAuthorIds = articleToUpdate.authors.map((a) => a.id); // IDs actuels
-      const newAuthorIds = authors; // Nouveaux IDs fournis
+      const newAuthorIds = authorsIds; // Nouveaux IDs fournis
 
       // Vérifier si tous les nouveaux auteurs existent
       const authorsExist = await Author.findAll({
@@ -206,5 +233,32 @@ exports.updateArticle = async (req, res) => {
   } catch (error) {
     console.error("Error updating article:", error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+exports.updateArticleStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const article = await Article.findByPk(id);
+
+    if (!article) {
+      return res.status(404).json({
+        error: "No article found",
+      });
+    }
+
+    article.status = status;
+    article.save();
+
+    res.status(200).json({
+      message: `Article status changed to "${
+        String(status).charAt(0).toUpperCase() + String(status).slice(1)
+      }" successfully.`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: `Internal server error : ${error}`,
+    });
   }
 };

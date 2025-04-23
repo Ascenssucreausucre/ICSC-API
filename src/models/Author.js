@@ -5,11 +5,29 @@ module.exports = (sequelize) => {
     "Author",
     {
       id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-      name: { type: DataTypes.STRING, allowNull: false },
-      surname: { type: DataTypes.STRING, allowNull: false },
-      country: { type: DataTypes.STRING, allowNull: false },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: { msg: "Author name can't be empty." },
+        },
+      },
+      surname: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: { msg: "Author surname can't be empty." },
+        },
+      },
+      country: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: { msg: "Author country can't be empty." },
+        },
+      },
       affiliation: { type: DataTypes.STRING, allowNull: false },
-      title: { type: DataTypes.STRING, allowNull: false },
+      title: { type: DataTypes.STRING },
     },
     {
       tableName: "authors",

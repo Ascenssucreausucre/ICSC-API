@@ -60,5 +60,9 @@ models.Conference.hasMany(models.LocalInformation, {
   foreignKey: "conference_id",
   as: "localInfomations",
 });
+models.Conference.hasOne(models.AdditionnalFee, {
+  foreignKey: "conference_id",
+  as: "additionnalfees",
+});
 
 module.exports = models;
