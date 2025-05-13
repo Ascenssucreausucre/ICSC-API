@@ -71,7 +71,7 @@ models.Conference.hasOne(models.AdditionnalFee, {
 
 async function syncModels() {
   try {
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log("✅ Base de données synchronisée");
   } catch (err) {
     console.error("❌ Erreur de synchronisation :", err);

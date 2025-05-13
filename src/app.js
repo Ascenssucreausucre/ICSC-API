@@ -61,7 +61,16 @@ const FrontRoutes = require("./routes/FrontRoutes");
 app.use("/api/front-routes", FrontRoutes);
 
 // Synchronisation avec la base de données
-models.sync();
+async function startServer() {
+  await models.sync(); // ✅ Attend bien que Sequelize ait fini
+  app.listen(PORT, () => {
+    console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+  });
+}
+
+startServer().catch((err) => {
+  console.error("❌ Erreur au démarrage :", err);
+});
 
 // Gestion des erreurs globale
 app.use((err, req, res, next) => {
