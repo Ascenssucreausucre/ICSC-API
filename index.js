@@ -1,6 +1,15 @@
-const app = require("./src/app");
+require("dotenv").config();
+const { app, init } = require("./src/app");
+
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Serveur démarré sur le port ${PORT}`);
-});
+init()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Serveur démarré sur le port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ Échec du démarrage :", err);
+    process.exit(1);
+  });
