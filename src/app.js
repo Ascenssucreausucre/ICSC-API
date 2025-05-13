@@ -61,10 +61,7 @@ const FrontRoutes = require("./routes/FrontRoutes");
 app.use("/api/front-routes", FrontRoutes);
 
 // Synchronisation avec la base de données
-sequelize
-  .sync({ alter: true })
-  .then(() => console.log("Base de données synchronisée."))
-  .catch((err) => console.error("Erreur de synchronisation :", err));
+models.sync();
 
 // Gestion des erreurs globale
 app.use((err, req, res, next) => {
