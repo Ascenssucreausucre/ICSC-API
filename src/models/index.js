@@ -39,6 +39,11 @@ async function syncModels() {
     await models.CommitteeMember.sync();
     await models.CommitteeRole.sync();
     await models.Sponsor.sync();
+    await models.Content.sync();
+    await models.Admin.sync();
+    await models.PlenarySessionAuthors.sync();
+    await models.SpecialSessionAuthors.sync();
+    await models.ArticleAuthors.sync();
 
     console.log("✅ Base de données synchronisée");
   } catch (err) {

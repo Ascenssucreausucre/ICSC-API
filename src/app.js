@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
-const sequelize = require("./config/sequelize");
 const models = require("./models");
 
 const app = express();

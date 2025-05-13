@@ -36,7 +36,7 @@ module.exports = (sequelize) => {
   );
   Author.associate = (models) => {
     Author.belongsToMany(models.Article, {
-      through: "articleauthors",
+      through: "articleauthors", // Utilise le modèle ArticleAuthor pour la table de jonction
       as: "articles",
       foreignKey: "author_id",
       otherKey: "article_id",

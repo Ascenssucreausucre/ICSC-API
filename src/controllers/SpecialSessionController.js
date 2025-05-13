@@ -58,6 +58,9 @@ exports.getByConferenceData = async (conference_id) => {
       include: {
         model: Author,
         as: "authors",
+        through: {
+          attributes: [],
+        },
       },
     });
   } catch (error) {
