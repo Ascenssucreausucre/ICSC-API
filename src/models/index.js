@@ -37,7 +37,7 @@ async function syncModels() {
     await models.Author.sync();
     await models.FeeCategory.sync();
     await models.CommitteeMember.sync();
-    await models.CommitteeRoles.sync();
+    await models.CommitteeRole.sync();
     await models.Sponsor.sync();
 
     console.log("✅ Base de données synchronisée");
