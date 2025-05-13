@@ -75,7 +75,7 @@ exports.getCurrentConferenceData = async () => {
 exports.getCurrentConference = async (req, res) => {
   try {
     const currentConference = await exports.getCurrentConferenceData();
-    res.status(200).json({ currentConference });
+    res.status(200).json(currentConference);
   } catch (error) {
     res.status(error.statusCode || 500).json({ error: error.message });
   }
