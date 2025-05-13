@@ -21,26 +21,24 @@ Object.keys(models).forEach((modelName) => {
 
 async function syncModels() {
   try {
-    await models.Conference.sync();
-    await Promise.all([
-      models.Author.sync(),
-      models.PlenarySession.sync(),
-      models.Article.sync(),
-      models.SpecialSession.sync(),
-      models.Topic.sync(),
-      models.Content.sync(),
-      models.RegistrationFee.sync(),
-      models.FeeCategory.sync(),
-      models.Committee.sync(),
-      models.CommitteeMember.sync(),
-      models.CommitteeRoles.sync(),
-      models.LocalInformation.sync(),
-      models.News.sync(),
-      models.ImportantDates.sync(),
-      models.AdditionnalFee.sync(),
-      models.Workshop.sync(),
-      models.Sponsor.sync(),
-    ]);
+    await models.Conference.sync(); // Conférence doit être dispo en premier
+
+    await models.Topic.sync();
+    await models.RegistrationFee.sync();
+    await models.News.sync();
+    await models.Article.sync();
+    await models.Committee.sync();
+    await models.ImportantDates.sync();
+    await models.SpecialSession.sync();
+    await models.Workshop.sync();
+    await models.LocalInformation.sync();
+    await models.PlenarySession.sync(); // maintenant elle peut utiliser conference_id
+    await models.AdditionnalFee.sync();
+    await models.Author.sync();
+    await models.FeeCategory.sync();
+    await models.CommitteeMember.sync();
+    await models.CommitteeRoles.sync();
+    await models.Sponsor.sync();
 
     // Définition manuelle des relations si besoin
     models.Conference.hasMany(models.Topic, {
