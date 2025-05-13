@@ -71,7 +71,26 @@ models.Conference.hasOne(models.AdditionnalFee, {
 
 async function syncModels() {
   try {
-    await sequelize.sync();
+    await models.Conference.sync();
+    await Promise.all([
+      models.Author.sync(),
+      models.PlenarySession.sync(),
+      models.Article.sync(),
+      models.SpecialSession.sync(),
+      models.Topic.sync(),
+      models.Content.sync(),
+      models.RegistrationFee.sync(),
+      models.FeeCategory.sync(),
+      models.Committee.sync(),
+      models.CommitteeMember.sync(),
+      models.CommitteeRoles.sync(),
+      models.LocalInformation.sync(),
+      models.News.sync(),
+      models.ImportantDates.sync(),
+      models.AdditionnalFee.sync(),
+      models.Workshop.sync(),
+      models.Sponsor.sync(),
+    ]);
     console.log("✅ Base de données synchronisée");
   } catch (err) {
     console.error("❌ Erreur de synchronisation :", err);
