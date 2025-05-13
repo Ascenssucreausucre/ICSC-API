@@ -19,56 +19,6 @@ Object.keys(models).forEach((modelName) => {
   }
 });
 
-// Définition manuelle des relations si besoin
-models.Conference.hasMany(models.Topic, {
-  foreignKey: "conference_id",
-  as: "topics",
-});
-models.Conference.hasMany(models.RegistrationFee, {
-  foreignKey: "conference_id",
-  as: "registrationfees",
-});
-models.Conference.hasMany(models.News, {
-  foreignKey: "conference_id",
-  as: "news",
-});
-models.Conference.hasMany(models.Article, {
-  foreignKey: "conference_id",
-  as: "articles",
-});
-models.Conference.hasMany(models.Committee, {
-  foreignKey: "conference_id",
-  as: "committee",
-});
-
-models.Conference.hasOne(models.ImportantDates, {
-  foreignKey: "conference_id",
-  as: "importantDates",
-});
-
-models.Conference.hasMany(models.SpecialSession, {
-  foreignKey: "conference_id",
-  as: "specialSessions",
-});
-
-models.Conference.hasMany(models.Workshop, {
-  foreignKey: "conference_id",
-  as: "workshops",
-});
-
-models.Conference.hasMany(models.LocalInformation, {
-  foreignKey: "conference_id",
-  as: "localInfomations",
-});
-models.Conference.hasMany(models.PlenarySession, {
-  foreignKey: "conference_id",
-  as: "plenarySessions",
-});
-models.Conference.hasOne(models.AdditionnalFee, {
-  foreignKey: "conference_id",
-  as: "additionnalfees",
-});
-
 async function syncModels() {
   try {
     await models.Conference.sync();
@@ -91,6 +41,56 @@ async function syncModels() {
       models.Workshop.sync(),
       models.Sponsor.sync(),
     ]);
+
+    // Définition manuelle des relations si besoin
+    models.Conference.hasMany(models.Topic, {
+      foreignKey: "conference_id",
+      as: "topics",
+    });
+    models.Conference.hasMany(models.RegistrationFee, {
+      foreignKey: "conference_id",
+      as: "registrationfees",
+    });
+    models.Conference.hasMany(models.News, {
+      foreignKey: "conference_id",
+      as: "news",
+    });
+    models.Conference.hasMany(models.Article, {
+      foreignKey: "conference_id",
+      as: "articles",
+    });
+    models.Conference.hasMany(models.Committee, {
+      foreignKey: "conference_id",
+      as: "committee",
+    });
+
+    models.Conference.hasOne(models.ImportantDates, {
+      foreignKey: "conference_id",
+      as: "importantDates",
+    });
+
+    models.Conference.hasMany(models.SpecialSession, {
+      foreignKey: "conference_id",
+      as: "specialSessions",
+    });
+
+    models.Conference.hasMany(models.Workshop, {
+      foreignKey: "conference_id",
+      as: "workshops",
+    });
+
+    models.Conference.hasMany(models.LocalInformation, {
+      foreignKey: "conference_id",
+      as: "localInfomations",
+    });
+    models.Conference.hasMany(models.PlenarySession, {
+      foreignKey: "conference_id",
+      as: "plenarySessions",
+    });
+    models.Conference.hasOne(models.AdditionnalFee, {
+      foreignKey: "conference_id",
+      as: "additionnalfees",
+    });
     console.log("✅ Base de données synchronisée");
   } catch (err) {
     console.error("❌ Erreur de synchronisation :", err);
