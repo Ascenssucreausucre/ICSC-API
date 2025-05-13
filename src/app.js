@@ -15,7 +15,7 @@ app.use("/uploads", express.static("public/uploads"));
 
 // CORS
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173", "https://icsc-production.up.railway.app"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
