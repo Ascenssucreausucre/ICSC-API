@@ -4,7 +4,6 @@ module.exports = (sequelize) => {
   const SpecialSessionAuthors = sequelize.define(
     "SpecialSessionAuthors",
     {
-      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
       special_session_id: { type: DataTypes.INTEGER, allowNull: false },
       author_id: { type: DataTypes.INTEGER, allowNull: false },
     },

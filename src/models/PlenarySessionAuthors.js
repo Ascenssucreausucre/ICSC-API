@@ -4,7 +4,6 @@ module.exports = (sequelize) => {
   const PlenarySessionAuthors = sequelize.define(
     "PlenarySessionAuthors",
     {
-      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
       plenary_session_id: { type: DataTypes.INTEGER, allowNull: false },
       author_id: { type: DataTypes.INTEGER, allowNull: false },
     },
