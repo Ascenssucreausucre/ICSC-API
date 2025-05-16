@@ -47,7 +47,7 @@ module.exports = (sequelize) => {
 
     // Relation many-to-many avec Author (via une table intermédiaire)
     SpecialSession.belongsToMany(models.Author, {
-      through: "specialsessionauthors",
+      through: models.SpecialSessionAuthors,
       as: "authors",
       foreignKey: "special_session_id",
       otherKey: "author_id",

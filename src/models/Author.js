@@ -36,7 +36,7 @@ module.exports = (sequelize) => {
   );
   Author.associate = (models) => {
     Author.belongsToMany(models.Article, {
-      through: "articleauthors", // Utilise le modèle ArticleAuthor pour la table de jonction
+      through: models.ArticleAuthors, // Utilise le modèle ArticleAuthor pour la table de jonction
       as: "articles",
       foreignKey: "author_id",
       otherKey: "article_id",
@@ -45,7 +45,7 @@ module.exports = (sequelize) => {
     });
 
     Author.belongsToMany(models.SpecialSession, {
-      through: "specialsessionauthors",
+      through: models.SpecialSessionAuthors,
       as: "specialsessions",
       foreignKey: "author_id",
       otherKey: "special_session_id",
@@ -54,7 +54,7 @@ module.exports = (sequelize) => {
     });
 
     Author.belongsToMany(models.PlenarySession, {
-      through: "plenarysessionauthors",
+      through: models.PlenarySessionAuthors,
       as: "plenarysessions",
       foreignKey: "author_id",
       otherKey: "plenary_session_id",

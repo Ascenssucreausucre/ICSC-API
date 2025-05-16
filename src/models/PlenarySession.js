@@ -78,7 +78,7 @@ module.exports = (sequelize) => {
       onDelete: "CASCADE",
     }),
       PlenarySession.belongsToMany(models.Author, {
-        through: "plenarysessionauthors",
+        through: models.PlenarySessionAuthors,
         as: "authors",
         foreignKey: "plenary_session_id",
         otherKey: "author_id",
