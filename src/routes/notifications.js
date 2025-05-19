@@ -33,7 +33,14 @@ router.post("/subscribe", async (req, res) => {
 });
 
 router.get("/notify-all", async (req, res) => {
-  const allSubs = await PushSubscription.findAll();
+  let allSubs;
+  try {
+    allSubs = await PushSubscription.findAll();
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: "Erreur récupération souscriptions." });
+  }
 
   const payload = JSON.stringify({
     title: "Nouvelle actu !",
@@ -41,25 +48,35 @@ router.get("/notify-all", async (req, res) => {
     url: "/",
   });
 
-  for (const sub of allSubs) {
-    try {
-      await webpush.sendNotification(
-        {
-          endpoint: sub.endpoint,
-          expirationTime: sub.expirationTime,
-          keys: {
-            p256dh: sub.p256dh,
-            auth: sub.auth,
+  const results = await Promise.allSettled(
+    allSubs.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            expirationTime: sub.expirationTime,
+            keys: {
+              p256dh: sub.p256dh,
+              auth: sub.auth,
+            },
           },
-        },
-        payload
-      );
-    } catch (err) {
-      console.error("Erreur sur", sub.endpoint, err);
-    }
-  }
+          payload
+        );
+        return { endpoint: sub.endpoint, status: "sent" };
+      } catch (err) {
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          await PushSubscription.destroy({ where: { endpoint: sub.endpoint } });
+        }
+        return {
+          endpoint: sub.endpoint,
+          status: "error",
+          message: err.message,
+        };
+      }
+    })
+  );
 
-  res.json({ message: "Notifications envoyées." });
+  res.json({ message: "Notifications traitées", results });
 });
 
 module.exports = router;
