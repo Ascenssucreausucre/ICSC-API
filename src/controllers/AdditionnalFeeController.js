@@ -1,4 +1,3 @@
-const { where } = require("sequelize");
 const { AdditionnalFee } = require("../models");
 
 exports.addAdditionnalFee = async (req, res) => {

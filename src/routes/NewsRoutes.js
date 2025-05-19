@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const NewsController = require("../controllers/NewsController");
 const createUploader = require("../middleware/uploads");
-const getCurrentConference = require("../middleware/getCurrentConference");
 const { authenticateAdmin } = require("../middleware/authenticateAdmin");
 const {
   verifyNews,

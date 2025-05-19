@@ -39,6 +39,7 @@ app.use("/api/special-sessions", require("./routes/SpecialSessionRoutes"));
 app.use("/api/workshops", require("./routes/WorkshopRoutes"));
 app.use("/api/local-informations", require("./routes/LocalInformationRoutes"));
 app.use("/api/front-routes", require("./routes/FrontRoutes"));
+app.use("/api/notifications", require("./routes/notifications"));
 
 // Erreur globale
 app.use((err, req, res, next) => {

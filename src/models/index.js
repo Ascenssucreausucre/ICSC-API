@@ -21,7 +21,7 @@ Object.keys(models).forEach((modelName) => {
 
 async function syncModels() {
   try {
-    await models.Conference.sync(); // Conférence doit être dispo en premier
+    await models.Conference.sync();
 
     await models.Topic.sync();
     await models.RegistrationFee.sync();
@@ -32,7 +32,7 @@ async function syncModels() {
     await models.SpecialSession.sync();
     await models.Workshop.sync();
     await models.LocalInformation.sync();
-    await models.PlenarySession.sync(); // maintenant elle peut utiliser conference_id
+    await models.PlenarySession.sync();
     await models.AdditionnalFee.sync();
     await models.Author.sync();
     await models.FeeCategory.sync();
@@ -44,6 +44,7 @@ async function syncModels() {
     await models.PlenarySessionAuthors.sync();
     await models.SpecialSessionAuthors.sync();
     await models.ArticleAuthors.sync();
+    await models.PushSubscription.sync();
 
     console.log("✅ Base de données synchronisée");
   } catch (err) {
