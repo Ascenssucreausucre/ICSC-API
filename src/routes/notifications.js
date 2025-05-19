@@ -1,30 +1,33 @@
 const express = require("express");
 const router = express.Router();
 const { PushSubscription } = require("../models");
+const webpush = require("web-push");
 
 router.post("/subscribe", async (req, res) => {
   const { endpoint, expirationTime, keys } = req.body;
 
   try {
-    // Upsert selon endpoint
-    const [sub, created] = await PushSubscription.upsert({
+    await PushSubscription.upsert({
       endpoint,
       expirationTime,
       p256dh: keys.p256dh,
       auth: keys.auth,
     });
 
-    // Envoi notification de bienvenue
+    // Envoi notification de bienvenue (non bloquant)
     const payload = JSON.stringify({
       title: "Bienvenue ! 🔔",
       body: "Tu recevras désormais les notifications.",
       url: "/",
     });
 
-    await webpush.sendNotification(req.body, payload);
+    webpush.sendNotification(req.body, payload).catch((err) => {
+      console.error("Échec de l'envoi de la notification :", err.message);
+    });
+
     res.status(201).json({ message: "Abonnement enregistré." });
   } catch (err) {
-    console.error("Erreur lors de l’enregistrement ou de l’envoi :", err);
+    console.error("Erreur d'enregistrement :", err);
     res.status(500).json({ error: "Erreur serveur." });
   }
 });
