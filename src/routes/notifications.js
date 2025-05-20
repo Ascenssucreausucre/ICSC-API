@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { PushSubscription } = require("../models");
-const webpush = require("web-push");
+const webpush = require("../utils/webPush");
 
 router.post("/subscribe", async (req, res) => {
   const { endpoint, expirationTime, keys } = req.body;
