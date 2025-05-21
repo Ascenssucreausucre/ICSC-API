@@ -15,7 +15,7 @@ exports.create = async (req, res) => {
       {
         title,
         text,
-        additionnal_file: uploadedFile,
+        additional_file: uploadedFile,
         date_from,
         date_to,
         presenters,
@@ -83,13 +83,13 @@ exports.update = async (req, res) => {
         .json({ error: `No workshop with id ${id} found.` });
     }
 
-    let newFile = workshop.additionnal_file;
+    let newFile = workshop.additional_file;
 
     if (uploadedFile) {
-      if (workshop.additionnal_file) {
+      if (workshop.additional_file) {
         const oldFilePath = path.join(
           "public/uploads",
-          workshop.additionnal_file
+          workshop.additional_file
         );
         await fs.unlink(oldFilePath).catch(() => {});
       }
@@ -100,7 +100,7 @@ exports.update = async (req, res) => {
       {
         title,
         text,
-        additionnal_file: newFile,
+        additional_file: newFile,
         date_from,
         date_to,
         presenters,
@@ -135,9 +135,9 @@ exports.delete = async (req, res) => {
         .json({ error: `No workshop found with id ${id}.` });
     }
 
-    if (workshop.additionnal_file) {
+    if (workshop.additional_file) {
       await fs
-        .unlink(path.join("public/uploads", workshop.additionnal_file))
+        .unlink(path.join("public/uploads", workshop.additional_file))
         .catch(() => {});
     }
 

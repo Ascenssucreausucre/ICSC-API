@@ -17,7 +17,7 @@ module.exports = (sequelize) => {
           notEmpty: { msg: "Workshop's text/description can't be empty" },
         },
       },
-      additionnal_file: {
+      additional_file: {
         type: DataTypes.STRING,
         allowNull: true,
       },

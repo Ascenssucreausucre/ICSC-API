@@ -9,7 +9,7 @@ const ArticleController = require("../controllers/ArticleController");
 const CommitteeController = require("../controllers/CommitteeController");
 const NewsController = require("../controllers/NewsController");
 const RegistrationFeeController = require("../controllers/RegistrationFeeController");
-const AdditionnalFeeController = require("../controllers/AdditionnalFeeController");
+const AdditionalFeeController = require("../controllers/AdditionalFeeController");
 const PlenarySessionController = require("../controllers/PlenarySessionController");
 const SpecialSessionController = require("../controllers/SpecialSessionController");
 const WorkshopController = require("../controllers/WorkshopController");
@@ -83,8 +83,8 @@ router.get("/get-everything-by-conference/:id", async (req, res) => {
       await RegistrationFeeController.getCurrentRegistrationFeesWithCategoriesData(
         id
       );
-    const additionnalFees =
-      await AdditionnalFeeController.getAdditionnalFeeByConferenceData(id);
+    const additionalFees =
+      await AdditionalFeeController.getAdditionalFeeByConferenceData(id);
     const importantDatesData =
       await ImportantDatesController.getCurrentImportantDatesData(id);
     const newsData = await NewsController.getNewsByConference(id);
@@ -116,7 +116,7 @@ router.get("/get-everything-by-conference/:id", async (req, res) => {
       articles: articlesData,
       committees: committeeData,
       registrationFees: registrationFeeData,
-      additionnalFees: additionnalFees,
+      additionalFees: additionalFees,
       importantDates: importantDatesData,
       news: newsData,
       sponsors: sponsorsData,
@@ -144,12 +144,12 @@ router.get(
       const dates = await ImportantDatesController.getCurrentImportantDatesData(
         req.params.conference_id
       );
-      const additionnalFees =
-        await AdditionnalFeeController.getAdditionnalFeeByConferenceData(
+      const additionalFees =
+        await AdditionalFeeController.getAdditionalFeeByConferenceData(
           req.params.conference_id
         );
       res.status(200).json({
-        additionnalFees,
+        additionalFees,
         importantDates: dates,
         registrationFees: fees,
       });
@@ -162,10 +162,9 @@ router.get(
 router.get("/submission", getCurrentConference, async (req, res) => {
   try {
     const { conference_id } = req.params;
-    const fees =
-      await AdditionnalFeeController.getAdditionnalFeeByConferenceData(
-        conference_id
-      );
+    const fees = await AdditionalFeeController.getAdditionalFeeByConferenceData(
+      conference_id
+    );
     const dates = await ImportantDatesController.getCurrentImportantDatesData(
       conference_id
     );

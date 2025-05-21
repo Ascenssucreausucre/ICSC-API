@@ -28,6 +28,16 @@ module.exports = (sequelize) => {
       },
       affiliation: { type: DataTypes.STRING, allowNull: false },
       title: { type: DataTypes.STRING },
+      user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true, // ou false si chaque auteur doit obligatoirement être lié à un utilisateur
+        references: {
+          model: "users",
+          key: "id",
+        },
+        onDelete: "SET NULL", // ou "CASCADE" si tu veux supprimer l’auteur avec l’utilisateur
+        onUpdate: "CASCADE",
+      },
     },
     {
       tableName: "authors",
@@ -59,6 +69,13 @@ module.exports = (sequelize) => {
       foreignKey: "author_id",
       otherKey: "plenary_session_id",
       onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+
+    Author.belongsTo(models.User, {
+      foreignKey: "user_id",
+      as: "userAccount",
+      onDelete: "SET NULL",
       onUpdate: "CASCADE",
     });
   };

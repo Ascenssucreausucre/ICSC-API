@@ -33,7 +33,7 @@ app.use("/api/committee", require("./routes/CommitteeRoutes"));
 app.use("/api/committee-member", require("./routes/CommitteeMemberRoutes"));
 app.use("/api/admin-auth", require("./routes/AuthRoutes"));
 app.use("/api/sponsors", require("./routes/SponsorRoutes"));
-app.use("/api/additionnal-fee", require("./routes/AdditionnalFeeRoutes"));
+app.use("/api/additional-fee", require("./routes/AdditionalFeeRoutes"));
 app.use("/api/plenary-sessions", require("./routes/PlenarySessionRoutes"));
 app.use("/api/special-sessions", require("./routes/SpecialSessionRoutes"));
 app.use("/api/workshops", require("./routes/WorkshopRoutes"));

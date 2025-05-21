@@ -3,35 +3,35 @@ const router = express.Router();
 const { authenticateAdmin } = require("../middleware/authenticateAdmin");
 const {
   handleValidationErrors,
-  verifyAdditionnalFees,
+  verifyAdditionalFees,
 } = require("../middleware/validators");
-const AdditionnalFeeController = require("../controllers/AdditionnalFeeController");
+const AdditionalFeeController = require("../controllers/AdditionalFeeController");
 
 router.get(
   "/:conference_id",
-  AdditionnalFeeController.getAdditionnalFeeByConference
+  AdditionalFeeController.getAdditionalFeeByConference
 );
 
 router.post(
   "/",
   authenticateAdmin,
-  verifyAdditionnalFees,
+  verifyAdditionalFees,
   handleValidationErrors,
-  AdditionnalFeeController.addAdditionnalFee
+  AdditionalFeeController.addAdditionalFee
 );
 
 router.put(
   "/:id",
   authenticateAdmin,
-  verifyAdditionnalFees,
+  verifyAdditionalFees,
   handleValidationErrors,
-  AdditionnalFeeController.updateAdditionnalFee
+  AdditionalFeeController.updateAdditionalFee
 );
 
 router.delete(
   "/:id",
   authenticateAdmin,
-  AdditionnalFeeController.deleteAdditionnalFee
+  AdditionalFeeController.deleteAdditionalFee
 );
 
 module.exports = router;

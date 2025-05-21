@@ -94,9 +94,9 @@ module.exports = (sequelize) => {
       foreignKey: "conference_id",
       as: "plenarySessions",
     });
-    Conference.hasOne(models.AdditionnalFee, {
+    Conference.hasOne(models.AdditionalFee, {
       foreignKey: "conference_id",
-      as: "additionnalfees",
+      as: "additionalfees",
     });
   };
 

@@ -256,25 +256,25 @@ exports.verifyAuthors = [
     .withMessage("Author country must be a string."),
 ];
 
-exports.verifyAdditionnalFees = [
-  body("additionnal_paper_fee")
+exports.verifyAdditionalFees = [
+  body("additional_paper_fee")
     .notEmpty()
-    .withMessage("Additionnal paper fee is required.")
+    .withMessage("Additional paper fee is required.")
     .bail()
     .isDecimal()
-    .withMessage("Additionnal paper fee must be a valid number.")
+    .withMessage("Additional paper fee must be a valid number.")
     .bail()
     .custom((value) => parseFloat(value) >= 0)
-    .withMessage("Additionnal paper fee must be a positive number."),
-  body("additionnal_page_fee")
+    .withMessage("Additional paper fee must be a positive number."),
+  body("additional_page_fee")
     .notEmpty()
-    .withMessage("Additionnal page fee is required.")
+    .withMessage("Additional page fee is required.")
     .bail()
     .isDecimal()
-    .withMessage("Additionnal page fee must be a valid number.")
+    .withMessage("Additional page fee must be a valid number.")
     .bail()
     .custom((value) => parseFloat(value) >= 0)
-    .withMessage("Additionnal page fee must be a positive number."),
+    .withMessage("Additional page fee must be a positive number."),
 ];
 
 exports.verifyPlenarySession = [

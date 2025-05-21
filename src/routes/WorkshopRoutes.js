@@ -27,7 +27,7 @@ router.get("/conference/:conference_id", WorkshopController.getByConference);
 router.post(
   "/",
   authenticateAdmin,
-  uploadFile.single("additionnal_file"),
+  uploadFile.single("additional_file"),
   verifyWorkshop,
   handleValidationErrors,
   WorkshopController.create
@@ -35,7 +35,7 @@ router.post(
 router.put(
   "/:id",
   authenticateAdmin,
-  uploadFile.single("additionnal_file"),
+  uploadFile.single("additional_file"),
   verifyWorkshop,
   handleValidationErrors,
   WorkshopController.update

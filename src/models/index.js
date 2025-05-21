@@ -21,30 +21,30 @@ Object.keys(models).forEach((modelName) => {
 
 async function syncModels() {
   try {
-    await models.Conference.sync();
+    await models.Conference.sync({ alter: true });
 
-    await models.Topic.sync();
-    await models.RegistrationFee.sync();
-    await models.News.sync();
-    await models.Article.sync();
-    await models.Committee.sync();
-    await models.ImportantDates.sync();
-    await models.SpecialSession.sync();
-    await models.Workshop.sync();
-    await models.LocalInformation.sync();
-    await models.PlenarySession.sync();
-    await models.AdditionnalFee.sync();
-    await models.Author.sync();
-    await models.FeeCategory.sync();
-    await models.CommitteeMember.sync();
-    await models.CommitteeRole.sync();
-    await models.Sponsor.sync();
-    await models.Content.sync();
-    await models.Admin.sync();
-    await models.PlenarySessionAuthors.sync();
-    await models.SpecialSessionAuthors.sync();
-    await models.ArticleAuthors.sync();
-    await models.PushSubscription.sync();
+    await models.Topic.sync({ alter: true });
+    await models.RegistrationFee.sync({ alter: true });
+    await models.News.sync({ alter: true });
+    await models.Article.sync({ alter: true });
+    await models.Committee.sync({ alter: true });
+    await models.ImportantDates.sync({ alter: true });
+    await models.SpecialSession.sync({ alter: true });
+    await models.Workshop.sync({ alter: true });
+    await models.LocalInformation.sync({ alter: true });
+    await models.PlenarySession.sync({ alter: true });
+    await models.AdditionalFee.sync({ alter: true });
+    await models.Author.sync({ alter: true });
+    await models.FeeCategory.sync({ alter: true });
+    await models.CommitteeMember.sync({ alter: true });
+    await models.CommitteeRole.sync({ alter: true });
+    await models.Sponsor.sync({ alter: true });
+    await models.Content.sync({ alter: true });
+    await models.Admin.sync({ alter: true });
+    await models.PlenarySessionAuthors.sync({ alter: true });
+    await models.SpecialSessionAuthors.sync({ alter: true });
+    await models.ArticleAuthors.sync({ alter: true });
+    await models.PushSubscription.sync({ alter: true });
 
     console.log("✅ Base de données synchronisée");
   } catch (err) {
