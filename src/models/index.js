@@ -34,6 +34,7 @@ async function syncModels() {
     await models.LocalInformation.sync({ alter: true });
     await models.PlenarySession.sync({ alter: true });
     await models.AdditionalFee.sync({ alter: true });
+    await models.User.sync({ alter: true });
     await models.Author.sync({ alter: true });
     await models.FeeCategory.sync({ alter: true });
     await models.CommitteeMember.sync({ alter: true });
