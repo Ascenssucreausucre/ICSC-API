@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Admin } = require("../models");
 
-const JWT_SECRET = process.env.JWT_SECRET || "ton-secret-de-jwt";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 /**
  * Connexion d'un administrateur
@@ -136,7 +136,6 @@ exports.deleteAdmin = async (req, res) => {
   }
 };
 
-// adminController.js
 exports.getCurrentAdmin = (req, res) => {
   const token = req.cookies?.token;
 

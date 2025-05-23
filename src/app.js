@@ -40,6 +40,7 @@ app.use("/api/workshops", require("./routes/WorkshopRoutes"));
 app.use("/api/local-informations", require("./routes/LocalInformationRoutes"));
 app.use("/api/front-routes", require("./routes/FrontRoutes"));
 app.use("/api/notifications", require("./routes/notifications"));
+app.use("/api/user", require("./routes/UserRoutes"));
 
 // Erreur globale
 app.use((err, req, res, next) => {

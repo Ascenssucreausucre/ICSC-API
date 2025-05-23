@@ -39,5 +39,10 @@ router.put(
   authenticateAdmin,
   ArticleController.updateArticleStatus
 );
+router.put(
+  "/update-status",
+  authenticateAdmin,
+  ArticleController.bulkUpdateArticleStatus
+);
 
 module.exports = router;

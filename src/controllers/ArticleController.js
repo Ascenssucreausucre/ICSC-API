@@ -261,3 +261,42 @@ exports.updateArticleStatus = async (req, res) => {
     });
   }
 };
+
+exports.bulkUpdateArticleStatus = async (req, res) => {
+  try {
+    const { ids } = req.body; // Le tableau d'IDs doit être dans le corps de la requête
+    const { status } = req.body;
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: "IDs must be a non-empty array." });
+    }
+
+    // Trouver tous les articles correspondant aux IDs
+    const articles = await Article.findAll({ where: { id: ids } });
+
+    if (articles.length === 0) {
+      return res
+        .status(404)
+        .json({ error: "No articles found for the provided IDs." });
+    }
+
+    // Mettre à jour le statut pour tous les articles
+    await Promise.all(
+      articles.map((article) => {
+        article.status = status;
+        return article.save();
+      })
+    );
+
+    res.status(200).json({
+      message: `Status of ${articles.length} article(s) updated to "${
+        String(status).charAt(0).toUpperCase() + String(status).slice(1)
+      }".`,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      error: `Internal server error: ${error.message}`,
+    });
+  }
+};

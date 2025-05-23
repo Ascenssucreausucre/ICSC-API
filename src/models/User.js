@@ -9,6 +9,20 @@ module.exports = (sequelize) => {
         autoIncrement: true,
         primaryKey: true,
       },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
+      surname: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
       email: {
         type: DataTypes.STRING,
         unique: true,
@@ -27,12 +41,16 @@ module.exports = (sequelize) => {
           len: [6, 100],
         },
       },
-      role: {
-        type: DataTypes.ENUM("author", "user"),
-        defaultValue: "user",
-        validate: {
-          isIn: [["author", "user"]],
+      author_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        unique: true,
+        references: {
+          model: "authors",
+          key: "id",
         },
+        onDelete: "SET NULL",
+        onUpdate: "CASCADE",
       },
     },
     {
@@ -42,9 +60,9 @@ module.exports = (sequelize) => {
   );
 
   User.associate = (models) => {
-    User.hasOne(models.Author, {
-      foreignKey: "user_id",
-      as: "authorProfile",
+    User.belongsTo(models.Author, {
+      foreignKey: "author_id",
+      as: "author",
       onDelete: "SET NULL",
       onUpdate: "CASCADE",
     });
