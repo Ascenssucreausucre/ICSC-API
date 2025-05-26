@@ -1,11 +1,11 @@
 require("dotenv").config();
-const { app, init } = require("./src/app");
+const { app, server, init } = require("./src/app");
 
 const PORT = process.env.PORT || 3000;
 
 init()
   .then(() => {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`🚀 Serveur démarré sur le port ${PORT}`);
     });
   })

@@ -82,7 +82,9 @@ exports.logIn = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ id: user.id, role: "user" }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     res.cookie("token", token, {
       httpOnly: true, // Protège contre XSS

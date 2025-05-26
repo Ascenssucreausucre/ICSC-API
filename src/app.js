@@ -1,10 +1,13 @@
 const express = require("express");
+const http = require("http");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const models = require("./models");
+const { Server } = require("socket.io");
 
 const app = express();
+const server = http.createServer(app);
 
 // Middlewares
 app.use(cookieParser());
@@ -20,6 +23,11 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 app.use(cors(corsOptions));
+
+const io = new Server(server, {
+  cors: corsOptions,
+});
+app.set("io", io);
 
 // Routes
 app.use("/api/conferences", require("./routes/ConferenceRoutes"));
@@ -41,6 +49,25 @@ app.use("/api/local-informations", require("./routes/LocalInformationRoutes"));
 app.use("/api/front-routes", require("./routes/FrontRoutes"));
 app.use("/api/notifications", require("./routes/notifications"));
 app.use("/api/user", require("./routes/UserRoutes"));
+app.use("/api/", require("./routes/ConversationRoutes"));
+
+io.on("connection", (socket) => {
+  console.log("New socket connected:", socket.id);
+
+  socket.on("joinRoom", (conversationId) => {
+    console.log(`🔗 Socket ${socket.id} joins conversation_${conversationId}`);
+    socket.join(`conversation_${conversationId}`);
+  });
+
+  socket.on("leaveRoom", (conversationId) => {
+    console.log(`❌ Socket ${socket.id} quit conversation_${conversationId}`);
+    socket.leave(`conversation_${conversationId}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+  });
+});
 
 // Erreur globale
 app.use((err, req, res, next) => {
@@ -51,6 +78,7 @@ app.use((err, req, res, next) => {
 // ➤ Export de l'app ET d'une fonction d'initialisation
 module.exports = {
   app,
+  server,
   init: async () => {
     try {
       await models.sync(); // Assure la synchro DB ici

@@ -22,6 +22,7 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.14.0",
     "sequelize": "^6.37.6",
+    "socket.io": "^4.8.1",
     "web-push": "^3.6.7"
   },
   "devDependencies": {

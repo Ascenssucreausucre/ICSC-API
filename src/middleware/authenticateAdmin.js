@@ -12,6 +12,12 @@ const authenticateAdmin = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.role !== "superadmin" && decoded.role !== "admin") {
+      throw new Error({
+        message:
+          "Unauthorized. If you are an admin, please log-in with your admin account.",
+      });
+    }
     req.admin = decoded; // id + role
     next();
   } catch (error) {
@@ -24,7 +30,7 @@ const authenticateAdmin = (req, res, next) => {
       });
     }
 
-    res.status(401).json({ error: "Invalid token." });
+    res.status(401).json({ error: error.message });
   }
 };
 

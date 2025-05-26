@@ -66,6 +66,9 @@ module.exports = (sequelize) => {
       onDelete: "SET NULL",
       onUpdate: "CASCADE",
     });
+    User.hasOne(models.Conversation, {
+      foreignKey: "userId",
+    });
   };
 
   return User;

@@ -34,8 +34,8 @@ async function syncModels() {
     await models.LocalInformation.sync();
     await models.PlenarySession.sync();
     await models.AdditionalFee.sync();
-    await models.Author.sync({ alter: true });
-    await models.User.sync({ alter: true });
+    await models.Author.sync();
+    await models.User.sync();
     await models.FeeCategory.sync();
     await models.CommitteeMember.sync();
     await models.CommitteeRole.sync();
@@ -46,6 +46,8 @@ async function syncModels() {
     await models.SpecialSessionAuthors.sync();
     await models.ArticleAuthors.sync();
     await models.PushSubscription.sync();
+    await models.Conversation.sync({ alter: true });
+    await models.Message.sync({ alter: true });
 
     console.log("✅ Base de données synchronisée");
   } catch (err) {
