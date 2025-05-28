@@ -131,7 +131,7 @@ exports.sendMessage = async (req, res) => {
       data: conversation,
     });
 
-    return res.status(201).json(message);
+    return res.status(201).json({ message, conversationId: conversation.id });
   } catch (error) {
     console.error("Error while sending the message:", error);
     return res.status(500).json({ message: `Server error: ${error.message}` });
