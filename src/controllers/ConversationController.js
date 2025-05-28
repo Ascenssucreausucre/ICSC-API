@@ -57,6 +57,14 @@ exports.sendMessage = async (req, res) => {
       conversationId: conversation.id,
     });
 
+    io.to(`conversation_${conversation.id}`).emit("newMessage", {
+      id: message.id,
+      content: message.content,
+      senderType: message.senderType,
+      senderId: message.senderId,
+      createdAt: message.createdAt,
+    });
+
     if (message.senderType !== "user") {
       const userId = conversation.userId;
 
@@ -105,14 +113,6 @@ exports.sendMessage = async (req, res) => {
     }
 
     await conversation.save();
-
-    io.to(`conversation_${conversation.id}`).emit("newMessage", {
-      id: message.id,
-      content: message.content,
-      senderType: message.senderType,
-      senderId: message.senderId,
-      createdAt: message.createdAt,
-    });
 
     await conversation.reload({
       include: [
