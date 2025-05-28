@@ -29,5 +29,15 @@ router.put(
   authenticateAdmin,
   ConversationController.archiveConversation
 );
+router.delete(
+  "/conversations/archived",
+  authenticateAdmin,
+  ConversationController.deleteArchivedConversations
+);
+router.delete(
+  "/conversations/:id",
+  authenticateAdmin,
+  ConversationController.deleteConversation
+);
 
 module.exports = router;
