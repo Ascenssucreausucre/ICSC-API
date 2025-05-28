@@ -26,7 +26,7 @@ exports.sendMessage = async (req, res) => {
         conversation = await Conversation.create({ userId: senderId });
       }
 
-      const lastMessage = conversation?.messages[0] || null;
+      const lastMessage = conversation.messages?.[0] || null;
 
       if (
         new Date(conversation.lastMessageAt).getTime() + 60 * 1000 >
