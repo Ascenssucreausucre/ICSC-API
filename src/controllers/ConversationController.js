@@ -88,18 +88,13 @@ exports.sendMessage = async (req, res) => {
             },
             JSON.stringify(payload)
           );
-          return { endpoint: userKeys.endpoint, status: "sent" };
         } catch (error) {
           if (err.statusCode === 410 || err.statusCode === 404) {
             await PushSubscription.destroy({
               where: { endpoint: userKeys.endpoint },
             });
           }
-          return {
-            endpoint: userKeys.endpoint,
-            status: "error",
-            message: err.message,
-          };
+          console.error({ error: error.message });
         }
       }
     }
