@@ -60,7 +60,7 @@ exports.sendMessage = async (req, res) => {
     if (message.senderType !== "user") {
       const userId = conversation.userId;
 
-      const userKeys = await PushSubscription.findByPk(userId);
+      const userKeys = await PushSubscription.findOne({ where: { userId } });
 
       console.log(userKeys, userId);
 
