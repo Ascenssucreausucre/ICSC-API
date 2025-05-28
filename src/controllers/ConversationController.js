@@ -26,7 +26,7 @@ exports.sendMessage = async (req, res) => {
         conversation = await Conversation.create({ userId: senderId });
       }
 
-      const lastMessage = conversation.messages[0];
+      const lastMessage = conversation.messages[0] || null;
 
       if (
         new Date(conversation.lastMessageAt).getTime() + 60 * 1000 >
@@ -58,7 +58,7 @@ exports.sendMessage = async (req, res) => {
     });
 
     if (message.senderType !== "user") {
-      const userId = conversation.userId;
+      const userId = conversation?.userId;
 
       const userKeys = await PushSubsciptions.findByPk(userId);
 

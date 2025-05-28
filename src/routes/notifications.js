@@ -3,8 +3,9 @@ const router = express.Router();
 const { PushSubscription } = require("../models");
 const webpush = require("../utils/webPush");
 const { authenticateAdmin } = require("../middleware/authenticateAdmin");
+const { authenticateAny } = require("../middleware/authenticateAny");
 
-router.post("/subscribe", async (req, res) => {
+router.post("/subscribe", authenticateAny, async (req, res) => {
   const { endpoint, expirationTime, keys } = req.body;
   const { id } = req.user;
 
