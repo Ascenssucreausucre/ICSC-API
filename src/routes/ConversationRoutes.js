@@ -12,7 +12,7 @@ router.get(
 router.get(
   "/conversations",
   authenticateAdmin,
-  ConversationController.getAllConversationsWithLastMessage
+  ConversationController.getAdminConversations
 );
 router.get(
   "/conversations/:id",
@@ -20,12 +20,12 @@ router.get(
   ConversationController.getConversation
 );
 router.post(
-  "/conversation/send-message",
+  "/conversation/send-message/:id",
   authenticateAny,
   ConversationController.sendMessage
 );
 router.put(
-  "/conversation/archive",
+  "/conversation/archive/:conversationId",
   authenticateAdmin,
   ConversationController.archiveConversation
 );

@@ -54,14 +54,18 @@ app.use("/api/", require("./routes/ConversationRoutes"));
 io.on("connection", (socket) => {
   console.log("New socket connected:", socket.id);
 
-  socket.on("joinRoom", (conversationId) => {
-    console.log(`🔗 Socket ${socket.id} joins conversation_${conversationId}`);
-    socket.join(`conversation_${conversationId}`);
+  socket.on("joinRoom", (roomId) => {
+    const roomName =
+      roomId === "adminRoom" ? "adminRoom" : `conversation_${roomId}`;
+    console.log(`🔗 Socket ${socket.id} joins ${roomName}`);
+    socket.join(roomName);
   });
 
-  socket.on("leaveRoom", (conversationId) => {
-    console.log(`❌ Socket ${socket.id} quit conversation_${conversationId}`);
-    socket.leave(`conversation_${conversationId}`);
+  socket.on("leaveRoom", (roomId) => {
+    const roomName =
+      roomId === "adminRoom" ? "adminRoom" : `conversation_${roomId}`;
+    console.log(`❌ Socket ${socket.id} quits ${roomName}`);
+    socket.leave(roomName);
   });
 
   socket.on("disconnect", () => {

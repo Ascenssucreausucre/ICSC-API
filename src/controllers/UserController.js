@@ -52,6 +52,7 @@ exports.register = async (req, res) => {
 
     res.status(201).json({
       message: `Welcome to ICSC ${newUser.name} ! Log-in to `,
+      id: newUser.id,
     });
   } catch (error) {
     console.error(error.message);
@@ -153,7 +154,7 @@ exports.getProfile = async (req, res) => {
   }
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded?.role) {
+    if (decoded?.role !== "user") {
       return res.status(400).json({
         error:
           "You can't be connected both admin and user on this website. Please disconnect from the dashboard in order to log-in in the public part of the website.",

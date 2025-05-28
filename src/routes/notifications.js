@@ -6,6 +6,7 @@ const { authenticateAdmin } = require("../middleware/authenticateAdmin");
 
 router.post("/subscribe", async (req, res) => {
   const { endpoint, expirationTime, keys } = req.body;
+  const { id } = req.user;
 
   try {
     await PushSubscription.upsert({
@@ -13,6 +14,7 @@ router.post("/subscribe", async (req, res) => {
       expirationTime,
       p256dh: keys.p256dh,
       auth: keys.auth,
+      userId: id,
     });
 
     // Envoi notification de bienvenue (non bloquant)

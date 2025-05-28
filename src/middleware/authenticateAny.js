@@ -29,6 +29,6 @@ exports.authenticateAny = (req, res, next) => {
       });
     }
 
-    res.status(401).json({ error: "Invalid token." });
+    res.status(401).json({ error: "Session expired." });
   }
 };
