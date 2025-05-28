@@ -1,5 +1,5 @@
 const webPush = require("../utils/webPush");
-const { Message, Conversation, User, PushSubsciptions } = require("../models");
+const { Message, Conversation, User, PushSubscriptions } = require("../models");
 
 exports.sendMessage = async (req, res) => {
   const io = req.app.get("io");
@@ -58,9 +58,9 @@ exports.sendMessage = async (req, res) => {
     });
 
     if (message.senderType !== "user") {
-      const userId = conversation?.userId;
+      const userId = conversation.userId;
 
-      const userKeys = await PushSubsciptions.findByPk(userId);
+      const userKeys = await PushSubscriptions.findByPk(userId);
 
       if (userKeys) {
         const payload = {
