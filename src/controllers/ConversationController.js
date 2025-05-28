@@ -62,6 +62,8 @@ exports.sendMessage = async (req, res) => {
 
       const userKeys = await PushSubscription.findByPk(userId);
 
+      console.log(userKeys, userId);
+
       if (userKeys) {
         const payload = {
           title: "New message",
