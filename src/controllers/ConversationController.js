@@ -356,14 +356,13 @@ exports.archiveConversation = async (req, res) => {
 exports.deleteConversation = async (req, res) => {
   const { id } = req.params;
   try {
-    const conv = Conversation.findByPk(id);
-    if (!conv) {
+    const conv = await Conversation.destroy({ where: { id } });
+
+    if (conv < 1) {
       return res.status(404).json({
         error: `No conference found with id ${id}`,
       });
     }
-
-    await conv.destroy();
 
     res.status(200).json({ message: "Conversation successfully deleted." });
   } catch (error) {
