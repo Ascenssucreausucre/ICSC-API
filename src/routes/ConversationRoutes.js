@@ -29,6 +29,11 @@ router.put(
   authenticateAdmin,
   ConversationController.archiveConversation
 );
+router.put(
+  "/conversation/toggle-throttling/:conversationId",
+  authenticateAdmin,
+  ConversationController.toggleThrottling
+);
 router.delete(
   "/conversations/archived",
   authenticateAdmin,

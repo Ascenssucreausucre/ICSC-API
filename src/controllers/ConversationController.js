@@ -32,7 +32,8 @@ exports.sendMessage = async (req, res) => {
         new Date(conversation.lastMessageAt).getTime() + 60 * 1000 >
           Date.now() &&
         lastMessage &&
-        lastMessage.senderType === "user"
+        lastMessage.senderType === "user" &&
+        conversation.throttling === true
       ) {
         return res.status(429).json({
           message: "Please wait at least 1 minute between messages.",
@@ -379,6 +380,34 @@ exports.deleteArchivedConversations = async (req, res) => {
 
     res.status(200).json({
       message: "All archived conversations has been successfully deleted.",
+    });
+  } catch (error) {
+    console.error("Error :", error);
+    return res.status(500).json({ message: `Server error: ${error.message}` });
+  }
+};
+
+exports.toggleThrottling = async (req, res) => {
+  const { conversationId } = req.params;
+  try {
+    const io = req.app.get("io");
+    const conv = await Conversation.findByPk(conversationId);
+    if (!conv) {
+      return res.status(404).json({
+        error: `No conversation found with id: ${conversationId}`,
+      });
+    }
+    await conv.update({
+      throttling: !conv.throttling,
+    });
+    io.to(`conversation_${conv.id}`).emit("throttlingToggled", {
+      throttling: conv.throttling,
+    });
+    res.status(200).json({
+      message: conv.throttling
+        ? "Throttling enabled for this conversation."
+        : "Throttling disabled for this conversation.",
+      throttling: conv.throttling,
     });
   } catch (error) {
     console.error("Error :", error);

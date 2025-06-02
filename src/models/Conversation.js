@@ -41,6 +41,10 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: false,
       },
+      throttling: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
     },
     {
       tableName: "conversations",
