@@ -16,11 +16,7 @@ module.exports = (sequelize) => {
       description: {
         type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-          notEmpty: {
-            msg: "Registration Fee's description/country cannot be empty.",
-          },
-        },
+        defaultValue: "Other Countries",
       },
     },
     {

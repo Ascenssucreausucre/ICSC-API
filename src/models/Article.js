@@ -8,6 +8,7 @@ module.exports = (sequelize) => {
       nr: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,
         validate: { notEmpty: { msg: "Nr can't be empty" } },
       },
       title: {
@@ -16,15 +17,6 @@ module.exports = (sequelize) => {
         validate: {
           notEmpty: {
             msg: "Title can't be empty.",
-          },
-        },
-      },
-      affiliation: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notEmpty: {
-            msg: "Affiliation can't be null.",
           },
         },
       },

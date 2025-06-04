@@ -1,4 +1,4 @@
-const { Author, Article } = require("../models");
+const { Author, Article, User } = require("../models");
 const { Op, Sequelize } = require("sequelize");
 
 exports.getAllAuthors = async (req, res) => {
@@ -40,16 +40,23 @@ exports.getAuthorByPk = async (req, res) => {
     const { id } = req.params;
     const authors = await Author.findOne({
       where: { id },
-      include: {
-        model: Article,
-        as: "articles",
-        through: { attributes: [] },
-        include: {
-          model: Author,
-          as: "authors",
+      include: [
+        {
+          model: Article,
+          as: "articles",
           through: { attributes: [] },
+          include: {
+            model: Author,
+            as: "authors",
+            through: { attributes: [] },
+          },
         },
-      },
+        {
+          model: User,
+          as: "userAccount",
+          attributes: { exclude: ["password"] },
+        },
+      ],
     });
     if (!authors) {
       return res.status(404).json({

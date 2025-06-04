@@ -1,5 +1,6 @@
 const webPush = require("../utils/webPush");
 const { Message, Conversation, User, PushSubscription } = require("../models");
+const { where } = require("sequelize");
 
 exports.sendMessage = async (req, res) => {
   const io = req.app.get("io");
@@ -296,9 +297,9 @@ exports.getAdminConversations = async (req, res) => {
       offset,
     });
 
-    return res
-      .status(200)
-      .json({ results: conversations, total: conversations.length });
+    const count = await Conversation.count({ where: whereClause });
+
+    return res.status(200).json({ results: conversations, total: count });
   } catch (error) {
     console.error("Error fetching conversations:", error);
     return res.status(500).json({ message: `Server error: ${error.message}` });

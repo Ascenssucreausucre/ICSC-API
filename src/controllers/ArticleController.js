@@ -1,4 +1,7 @@
-const { Article, Author } = require("../models"); // Remplacer "../models" par le chemin correct vers tes modèles
+const ImportExceldata = require("../middleware/importExcel");
+const { Article, Author } = require("../models");
+const fs = require("fs/promises");
+const path = require("path");
 
 exports.createArticle = async (req, res) => {
   const { authors, ...articleData } = req.body;
@@ -298,5 +301,30 @@ exports.bulkUpdateArticleStatus = async (req, res) => {
     res.status(500).json({
       error: `Internal server error: ${error.message}`,
     });
+  }
+};
+
+exports.importByFile = async (req, res) => {
+  const filePath = req?.file.path;
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const conferenceId = req.body.conference_id;
+    if (!conferenceId) {
+      return res.status(400).json({ error: "Conference id is required." });
+    }
+
+    await ImportExceldata(filePath, conferenceId);
+
+    return res.status(200).json({ message: "Importation successful." });
+  } catch (error) {
+    console.error("Erreur d'importation :", error.message);
+    return res
+      .status(500)
+      .json({ error: "Error during importation: " + error.message });
+  } finally {
+    await fs.unlink(path.join(filePath)).catch(() => {});
   }
 };

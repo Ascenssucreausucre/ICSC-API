@@ -1,12 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const ArticleController = require("../controllers/ArticleController");
-const getCurrentConference = require("../middleware/getCurrentConference");
 const { authenticateAdmin } = require("../middleware/authenticateAdmin");
 const {
   verifyArticle,
   handleValidationErrors,
 } = require("../middleware/validators");
+const createUploader = require("../middleware/uploads");
+
+const uploadFile = createUploader({
+  folder: "excel-files",
+  allowedTypes: [
+    "application/vnd.ms-excel", // .xls
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+  ],
+  maxSize: 10 * 1024 * 1024, // 10 Mo (ajustable)
+});
 
 router.get("/", ArticleController.findAllArticles);
 router.get("/find-by-author/:authorId", ArticleController.findArticleByAuthor);
@@ -43,6 +52,13 @@ router.put(
   "/update-status",
   authenticateAdmin,
   ArticleController.bulkUpdateArticleStatus
+);
+
+router.post(
+  "/add-by-file",
+  authenticateAdmin,
+  uploadFile.single("file"),
+  ArticleController.importByFile
 );
 
 module.exports = router;

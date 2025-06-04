@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const router = express.Router();
 const ConferenceController = require("../controllers/ConferenceController");
@@ -14,6 +15,15 @@ const PlenarySessionController = require("../controllers/PlenarySessionControlle
 const SpecialSessionController = require("../controllers/SpecialSessionController");
 const WorkshopController = require("../controllers/WorkshopController");
 const LocalInformationController = require("../controllers/LocalInformationController");
+const {
+  Article,
+  Author,
+  RegistrationFee,
+  FeeCategory,
+  AdditionalFee,
+} = require("../models");
+const { Op } = require("sequelize");
+const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY);
 
 router.get("/homepage-data", getCurrentConference, async (req, res) => {
   try {
@@ -199,6 +209,137 @@ router.get("/program", getCurrentConference, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json(error);
+  }
+});
+
+router.post("/payment", getCurrentConference, async (req, res) => {
+  const { conference_id } = req.params;
+  const {
+    articles,
+    attendanceMode,
+    country,
+    creditCardCountry,
+    email,
+    ieeeMember,
+    id,
+    paypal,
+    student,
+  } = req.body;
+  try {
+    const articleIds = articles.map((article) => article.id);
+    const existingArticles = await Article.findAll({
+      where: {
+        id: {
+          [Op.in]: articleIds,
+        },
+      },
+      include: {
+        model: Author,
+        as: "authors",
+        attributes: ["id"],
+      },
+    });
+
+    if (existingArticles.length !== articleIds.length) {
+      return res.status(400).json({
+        error: "Some articles couldn't be find.",
+        missingIds: articleIds.filter(
+          (id) => !existingArticles.find((article) => article.id === id)
+        ),
+      });
+    }
+
+    const unauthorizedArticles = existingArticles.filter(
+      (article) => !article.authors.some((author) => author.id === id)
+    );
+
+    if (unauthorizedArticles.length > 0) {
+      return res.status(401).json({
+        error: "An article of your selection doesn't belong to you.",
+        articles: unauthorizedArticles.map((a) => a.id),
+      });
+    }
+
+    const verifyStatus = existingArticles.find(
+      (article) => article.status !== "accepted"
+    );
+
+    if (verifyStatus) {
+      return res.status(401).json({
+        error: "An article of your selection is not accepted by the jury.",
+        article: verifyStatus,
+      });
+    }
+
+    let registrationFees = await RegistrationFee.findOne({
+      where: { description: country.toLowerCase() },
+    });
+
+    if (!registrationFees) {
+      registrationFees = await RegistrationFee.findOne({
+        where: { description: "Other Countries" },
+        include: {
+          model: FeeCategory,
+          as: "feecategories",
+        },
+      });
+    }
+
+    const category = registrationFees.feecategories.find((category) =>
+      student
+        ? category.type.toLowerCase() === "student"
+        : category.type.toLowerCase() === "academics"
+    );
+    const virtualAttendance = attendanceMode.toLowerCase() === "online";
+
+    const baseFee = virtualAttendance
+      ? Number(category.virtual_attendance)
+      : ieeeMember
+      ? Number(category.ieee_member)
+      : Number(category.non_ieee_member);
+
+    const additionnalFees = await AdditionalFee.findOne({
+      where: { conference_id },
+    });
+
+    const totalExtraPages = articles.reduce(
+      (sum, article) => sum + (Number(article.extraPages) || 0),
+      0
+    );
+
+    const extraArticles = Math.max(
+      0,
+      articles.length - additionnalFees.given_articles_per_registration
+    );
+
+    const totalFees = {
+      baseFee,
+      additionalArticlesFee:
+        extraArticles * additionnalFees.additional_paper_fee,
+      additionalArticles: extraArticles,
+      additionalPagesFee:
+        totalExtraPages * Number(additionnalFees.additional_page_fee),
+      additionalPages: totalExtraPages,
+      total: 0,
+    };
+    totalFees.total =
+      baseFee + totalFees.additionalArticlesFee + totalFees.additionalPagesFee;
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(totalFees.total * 100),
+      currency: "eur",
+      payment_method_types: ["card"],
+    });
+
+    return res.status(200).json({
+      totalFees,
+      email,
+      id,
+      clientSecret: paymentIntent.client_secret,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 

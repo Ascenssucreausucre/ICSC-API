@@ -81,7 +81,7 @@ exports.createRegistrationFeeWithCategories = async (req, res) => {
 
   try {
     const registrationFee = await RegistrationFee.create({
-      description,
+      description: description.toLowerCase(),
       conference_id,
     });
 
@@ -127,7 +127,7 @@ exports.updateRegistrationFeeWithCategories = async (req, res) => {
     }
 
     // Mise à jour de la description
-    await registrationFee.update({ description });
+    await registrationFee.update({ description: description.toLowerCase() });
 
     if (Array.isArray(feecategories)) {
       // Récupérer toutes les catégories existantes

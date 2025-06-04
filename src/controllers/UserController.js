@@ -1,7 +1,6 @@
 const { User, Author, Article } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { where } = require("sequelize");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -188,6 +187,73 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getUser = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await User.findByPk(userId, {
+      attributes: { exclude: ["password"] },
+      include: {
+        model: Author,
+        as: "author",
+        include: {
+          model: Article,
+          as: "articles",
+          include: {
+            model: Author,
+            as: "authors",
+          },
+        },
+      },
+    });
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error.message);
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        error: "Your session has expired. Please log in again.",
+        expiredAt: error.expiredAt,
+      });
+    }
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getAll = async (req, res) => {
+  const { limit = 20, page = 1, search } = req.query;
+  try {
+    const whereClause = {};
+    const includeOptions = [{ model: Author, as: "author" }];
+
+    const parsedLimit = parseInt(limit);
+    const parsedPage = parseInt(page);
+    const offset = (parsedPage - 1) * parsedLimit;
+
+    const users = await User.findAll({
+      attributes: { exclude: ["password"] },
+      where: whereClause,
+      include: includeOptions,
+      limit: parsedLimit,
+      offset,
+    });
+
+    const count = await User.count({ where: whereClause });
+
+    return res.status(200).json({ results: users, total: count });
+  } catch (error) {
+    console.error(error.message);
+
+    if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        error: "Your session has expired. Please log in again.",
+        expiredAt: error.expiredAt,
+      });
+    }
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.delete = async (req, res) => {
   const { id } = req.params;
   const token = req.cookies?.token;

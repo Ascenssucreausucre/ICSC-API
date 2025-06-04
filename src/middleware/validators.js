@@ -139,10 +139,6 @@ exports.verifyCommitteeMembers = [
 ];
 
 exports.verifyRegistrationFeesWithcategories = [
-  body("description")
-    .trim()
-    .notEmpty()
-    .withMessage("Registration Fee's description/country cannot be empty."),
   body("feecategories")
     .isArray()
     .withMessage("Fee Categories must be an array.")
