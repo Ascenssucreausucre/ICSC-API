@@ -226,7 +226,7 @@ router.post("/payment", getCurrentConference, async (req, res) => {
     student,
   } = req.body;
   try {
-    let articleIds;
+    let articleIds = [];
     if (articles) {
       articleIds = articles.map((article) => article.id);
     }
@@ -312,7 +312,7 @@ router.post("/payment", getCurrentConference, async (req, res) => {
 
     const extraArticles = Math.max(
       0,
-      articles.length - additionnalFees.given_articles_per_registration
+      (articles?.length || 0) - additionnalFees.given_articles_per_registration
     );
 
     const totalFees = {
