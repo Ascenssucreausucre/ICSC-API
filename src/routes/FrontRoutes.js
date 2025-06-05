@@ -305,10 +305,11 @@ router.post("/payment", getCurrentConference, async (req, res) => {
       where: { conference_id },
     });
 
-    const totalExtraPages = articles.reduce(
-      (sum, article) => sum + (Number(article.extraPages) || 0),
-      0
-    );
+    const totalExtraPages =
+      articles?.reduce(
+        (sum, article) => sum + (Number(article.extraPages) || 0),
+        0
+      ) || 0;
 
     const extraArticles = Math.max(
       0,
