@@ -290,7 +290,7 @@ router.post("/payment", getCurrentConference, async (req, res) => {
 
     const category = registrationFees.feecategories.find((category) =>
       student
-        ? category.type.toLowerCase() === "student"
+        ? category.type.toLowerCase() === "students"
         : category.type.toLowerCase() === "academics"
     );
     const virtualAttendance = attendanceMode.toLowerCase() === "online";
