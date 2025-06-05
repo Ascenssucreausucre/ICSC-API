@@ -338,10 +338,6 @@ router.post("/payment", getCurrentConference, async (req, res) => {
           request_three_d_secure: "automatic",
         },
       },
-      // ❌ Unable Stripe Link :
-      payment_method_data: {
-        type: "card",
-      },
     });
 
     return res.status(200).json({
