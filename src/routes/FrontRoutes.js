@@ -226,7 +226,10 @@ router.post("/payment", getCurrentConference, async (req, res) => {
     student,
   } = req.body;
   try {
-    const articleIds = articles.map((article) => article.id);
+    let articleIds;
+    if (articles) {
+      articleIds = articles.map((article) => article.id);
+    }
     const existingArticles = await Article.findAll({
       where: {
         id: {
@@ -329,6 +332,15 @@ router.post("/payment", getCurrentConference, async (req, res) => {
       amount: Math.round(totalFees.total * 100),
       currency: "eur",
       payment_method_types: ["card"],
+      payment_method_options: {
+        card: {
+          request_three_d_secure: "automatic",
+        },
+      },
+      // ❌ Unable Stripe Link :
+      payment_method_data: {
+        type: "card",
+      },
     });
 
     return res.status(200).json({
