@@ -385,6 +385,114 @@ exports.verifyAdmin = [
     ),
 ];
 
+exports.verifyMessage = [
+  body("content")
+    .notEmpty()
+    .withMessage("You can't send an empty message.")
+    .isString("You can't submit anything else than string."),
+];
+
+exports.verifyPaymentInformations = [
+  body("articles")
+    .optional()
+    .isArray()
+    .withMessage("Articles must be a non-empty array.")
+    .custom((articles) => {
+      for (const article of articles) {
+        if (!article.id) {
+          throw new Error("Each article must have an id.");
+        }
+        if ("extraPages" in article && isNaN(article.extraPages)) {
+          throw new Error("extraPages must be a number if provided.");
+        }
+      }
+      return true;
+    }),
+  body("options").optional().isArray().withMessage("Options must be an array."),
+
+  body("attendanceMode")
+    .isString()
+    .withMessage("Attendance mode is required.")
+    .isIn(["online", "onsite"])
+    .withMessage("Attendance mode must be 'online' or 'onsite'."),
+
+  body("country").isString().withMessage("Country is required."),
+
+  body("creditCardCountry")
+    .isString()
+    .withMessage("Credit card country is required."),
+
+  body("email").isEmail().withMessage("Valid email is required."),
+
+  body("ieeeMember")
+    .isBoolean()
+    .withMessage("ieeeMember must be true or false."),
+
+  body("student").isBoolean().withMessage("student must be true or false."),
+
+  body("id").isInt().withMessage("id must be an integer."),
+
+  // body("paypal")
+  //   .optional()
+  //   .isObject()
+  //   .withMessage("If provided, paypal must be an object."),
+];
+
+exports.verifyUser = [
+  body("email")
+    .notEmpty()
+    .withMessage("Please enter your email adress.")
+    .isEmail()
+    .withMessage("Wrong email format given."),
+  body("password")
+    .notEmpty()
+    .withMessage("Please enter your password.")
+    .isString()
+    .withMessage("Password must be sent as strings."),
+  body("name")
+    .notEmpty()
+    .withMessage("Please enter your name.")
+    .isString()
+    .withMessage("Name must be sent as strings."),
+  body("surname")
+    .notEmpty()
+    .withMessage("Please enter your surname.")
+    .isString()
+    .withMessage("Surname must be sent as strings."),
+  body("author_pin")
+    .optional()
+    .isString()
+    .withMessage("Author's PIN has to be a number."),
+];
+exports.verifyUserLogin = [
+  body("email")
+    .notEmpty()
+    .withMessage("Please enter your email adress.")
+    .isEmail()
+    .withMessage("Wrong email format given."),
+  body("password")
+    .notEmpty()
+    .withMessage("Please enter your password.")
+    .isString()
+    .withMessage("Password must be sent as strings."),
+];
+exports.verifyUserUpdate = [
+  body("name")
+    .notEmpty()
+    .withMessage("Please enter your name.")
+    .isString()
+    .withMessage("Name must be sent as strings."),
+  body("surname")
+    .notEmpty()
+    .withMessage("Please enter your surname.")
+    .isString()
+    .withMessage("Surname must be sent as strings."),
+  body("author_pin")
+    .optional()
+    .isString()
+    .withMessage("Author's PIN has to be a number."),
+];
+
 // Étape 2 : middleware d'erreurs
 exports.handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);

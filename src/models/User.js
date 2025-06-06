@@ -69,6 +69,12 @@ module.exports = (sequelize) => {
     User.hasOne(models.Conversation, {
       foreignKey: "userId",
     });
+    User.hasMany(models.PushSubscription, {
+      foreignKey: "userId",
+      as: "pushSubscriptions",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
   };
 
   return User;

@@ -1,6 +1,7 @@
 const { User, Author, Article } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { Op } = require("sequelize");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -103,7 +104,7 @@ exports.logIn = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  const { name, surname } = req.body;
+  const { name, surname, pin } = req.body;
   const token = req.cookies?.token;
 
   if (!token) {
@@ -120,6 +121,22 @@ exports.update = async (req, res) => {
       return res.status(404).json({ error: "User not found." });
     }
 
+    if (pin.length > 0 && pin !== user.author_id) {
+      const author = await Author.findByPk(pin);
+      const isAuthorLinked = await User.findOne({ where: { author_id: pin } });
+      if (!author) {
+        return res
+          .status(404)
+          .json({ error: `No author found with pin ${pin}` });
+      }
+      if (isAuthorLinked && isAuthorLinked.id !== user.id) {
+        console.log(isAuthorLinked);
+        return res.status(403).json({
+          error: `Author with pin ${pin} is linked to another account. If you think this is an error, please contact the support as soon as possible.`,
+        });
+      }
+    }
+
     await user.update({
       name:
         typeof name === "string" && name.trim().length > 0 ? name : user.name,
@@ -127,6 +144,7 @@ exports.update = async (req, res) => {
         typeof surname === "string" && surname.trim().length > 0
           ? surname
           : user.surname,
+      author_id: pin || null,
     });
 
     res.json({ message: "User updated successfully.", user });
@@ -224,6 +242,15 @@ exports.getAll = async (req, res) => {
   const { limit = 20, page = 1, search } = req.query;
   try {
     const whereClause = {};
+
+    if (search && search.length > 0) {
+      whereClause[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { surname: { [Op.like]: `%${search}%` } },
+        { author_id: { [Op.eq]: search } },
+      ];
+    }
+
     const includeOptions = [{ model: Author, as: "author" }];
 
     const parsedLimit = parseInt(limit);
@@ -256,26 +283,8 @@ exports.getAll = async (req, res) => {
 
 exports.delete = async (req, res) => {
   const { id } = req.params;
-  const token = req.cookies?.token;
-
-  if (!token) {
-    return res.status(401).json({
-      error: "No token provided. Try logging-in again.",
-    });
-  }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-
-    if (
-      decoded.id !== id ||
-      decoded.role !== "admin" ||
-      decoded.role !== "superadmin"
-    ) {
-      return res.status(403).json({
-        error: "You are not authorized to delete this user.",
-      });
-    }
     const user = await User.findByPk(id);
     if (!user) {
       return res.status(404).json({
@@ -283,6 +292,7 @@ exports.delete = async (req, res) => {
       });
     }
     await user.destroy();
+    return res.status(200).json({ message: "User succesfully deleted." });
   } catch (error) {
     console.error(error.message);
 
@@ -298,4 +308,20 @@ exports.delete = async (req, res) => {
 exports.logOut = async (req, res) => {
   res.clearCookie("token"); // Supprime le cookie
   res.status(200).json({ message: "Logged out successfully" });
+};
+exports.unlinkAuthor = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findByPk(id);
+    if (!user.author_id) {
+      return res.status(400).json({
+        error: "This user has no author to unlink.",
+      });
+    }
+    await user.update({ author_id: null });
+    res.status(200).json({ message: "Author has been successfully reset." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 };

@@ -3,44 +3,46 @@ const router = express.Router();
 const ConversationController = require("../controllers/ConversationController");
 const { authenticateAdmin } = require("../middleware/authenticateAdmin");
 const { authenticateAny } = require("../middleware/authenticateAny");
+const {
+  verifyMessage,
+  handleValidationErrors,
+} = require("../middleware/validators");
 
 router.get(
-  "/user/conversation",
+  "/user/",
   authenticateAny,
   ConversationController.getUserConversation
 );
 router.get(
-  "/conversations",
+  "/",
   authenticateAdmin,
   ConversationController.getAdminConversations
 );
-router.get(
-  "/conversations/:id",
-  authenticateAdmin,
-  ConversationController.getConversation
-);
+router.get("/:id", authenticateAdmin, ConversationController.getConversation);
 router.post(
-  "/conversation/send-message/:id",
+  "/send-message/:id",
+  verifyMessage,
+  handleValidationErrors,
   authenticateAny,
   ConversationController.sendMessage
 );
 router.put(
-  "/conversation/archive/:conversationId",
+  "/archive/:conversationId",
   authenticateAdmin,
   ConversationController.archiveConversation
 );
 router.put(
-  "/conversation/toggle-throttling/:conversationId",
+  "/toggle-throttling/:conversationId",
   authenticateAdmin,
   ConversationController.toggleThrottling
 );
 router.delete(
-  "/conversations/archived",
+  "/archived",
   authenticateAdmin,
   ConversationController.deleteArchivedConversations
 );
 router.delete(
-  "/conversations/:id",
+  "/:id",
   authenticateAdmin,
   ConversationController.deleteConversation
 );

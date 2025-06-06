@@ -24,6 +24,11 @@ module.exports = (sequelize) => {
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,
+        references: {
+          model: "users",
+          key: "id",
+        },
       },
     },
     {
@@ -31,6 +36,15 @@ module.exports = (sequelize) => {
       timestamps: true,
     }
   );
+
+  PushSubscription.associate = (models) => {
+    PushSubscription.belongsTo(models.User, {
+      foreignKey: "userId",
+      as: "user",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
+  };
 
   return PushSubscription;
 };
