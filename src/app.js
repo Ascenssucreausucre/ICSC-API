@@ -32,7 +32,6 @@ app.set("io", io);
 
 // Routes
 app.use("/api/", secureThrottling, require("./routes"));
-// app.use("/api/", require("./routes/ConversationRoutes"));
 
 io.on("connection", (socket) => {
   console.log("New socket connected:", socket.id);

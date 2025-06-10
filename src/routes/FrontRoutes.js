@@ -155,22 +155,25 @@ router.get(
   "/registration-fees/current",
   getCurrentConference,
   async (req, res) => {
+    const conference_id = req.params.conference_id;
     try {
       const fees =
         await RegistrationFeeController.getCurrentRegistrationFeesWithCategoriesData(
-          req.params.conference_id
+          conference_id
         );
       const dates = await ImportantDatesController.getCurrentImportantDatesData(
-        req.params.conference_id
+        conference_id
       );
       const additionalFees =
         await AdditionalFeeController.getAdditionalFeeByConferenceData(
-          req.params.conference_id
+          conference_id
         );
+      const options = await PaymentOption.findAll({ where: { conference_id } });
       res.status(200).json({
         additionalFees,
         importantDates: dates,
         registrationFees: fees,
+        paymentOptions: options,
       });
     } catch (error) {
       res.status(error.statusCode || 500).json({ error: error.message });

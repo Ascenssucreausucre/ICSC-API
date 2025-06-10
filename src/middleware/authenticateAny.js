@@ -6,16 +6,18 @@ exports.authenticateAny = (req, res, next) => {
   const token = req.cookies?.token;
 
   if (!token) {
-    return res.status(401).json({ error: "No token provided." });
+    return res.status(401).json({
+      error:
+        "No token provided, you may have been disconnected. Please log-in again.",
+    });
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // On place les infos du token dans req.user
     req.user = {
       id: decoded.id,
-      role: decoded.role || "user", // par défaut, on suppose que c'est un user
+      role: decoded.role || "user",
     };
 
     next();

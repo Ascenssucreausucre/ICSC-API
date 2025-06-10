@@ -413,7 +413,7 @@ exports.verifyPaymentInformations = [
   body("attendanceMode")
     .isString()
     .withMessage("Attendance mode is required.")
-    .isIn(["online", "onsite"])
+    .isIn(["Online", "Face to face"])
     .withMessage("Attendance mode must be 'online' or 'onsite'."),
 
   body("country").isString().withMessage("Country is required."),
