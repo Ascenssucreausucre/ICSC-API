@@ -21,6 +21,9 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         defaultValue: 0,
       },
+      description: {
+        type: DataTypes.TEXT,
+      },
     },
     {
       tableName: "payment_options",

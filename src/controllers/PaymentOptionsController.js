@@ -18,13 +18,14 @@ exports.create = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  const { name, price, id } = req.body;
+  const { name, price, description } = req.body;
+  const { id } = req.params;
   try {
     const option = await PaymentOption.findByPk(id);
     if (!option) {
       return res.status(404).json({ error: `No option found with id ${id}` });
     }
-    await option.update({ name, price });
+    await option.update({ name, price, description });
     res.status(200).json({ message: "Option successfully updated." });
   } catch (error) {
     console.error(error);

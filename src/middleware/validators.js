@@ -430,7 +430,7 @@ exports.verifyPaymentInformations = [
 
   body("student").isBoolean().withMessage("student must be true or false."),
 
-  body("id").isInt().withMessage("id must be an integer."),
+  body("id").optional().isInt().withMessage("id must be an integer."),
 
   // body("paypal")
   //   .optional()

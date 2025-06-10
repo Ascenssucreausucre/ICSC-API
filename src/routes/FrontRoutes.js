@@ -285,9 +285,11 @@ router.post(
         });
       }
 
-      const unauthorizedArticles = existingArticles.filter(
-        (article) => !article.authors.some((author) => author.id === id)
-      );
+      const unauthorizedArticles = id
+        ? existingArticles.filter(
+            (article) => !article.authors.some((author) => author.id === id)
+          )
+        : [];
 
       if (unauthorizedArticles.length > 0) {
         return res.status(401).json({
