@@ -308,7 +308,8 @@ router.post(
       }
 
       let registrationFees = await RegistrationFee.findOne({
-        where: { description: country.toLowerCase() },
+        where: { description: { [Op.like]: country } },
+        include: { model: FeeCategory, as: "feecategories" },
       });
 
       if (!registrationFees) {
@@ -326,7 +327,21 @@ router.post(
           ? category.type.toLowerCase() === "students"
           : category.type.toLowerCase() === "academics"
       );
+
+      if (!category) {
+        return res.status(400).json({
+          error: `No registration category found for ${
+            student ? "Students" : "Academics"
+          } in country ${country}.`,
+        });
+      }
       const virtualAttendance = attendanceMode.toLowerCase() === "online";
+
+      if (virtualAttendance && category.virtual_attendance == null) {
+        return res.status(400).json({
+          error: "Virtual attendance is not available for this category.",
+        });
+      }
 
       const baseFee = virtualAttendance
         ? Number(category.virtual_attendance)
@@ -372,6 +387,13 @@ router.post(
         totalFees.additionalArticlesFee +
         totalFees.additionalPagesFee +
         totalFees.totalOptionsFee;
+
+      if (totalFees.total === 0) {
+        return res.status(400).json({
+          error:
+            "Total fee is zero. Free registrations must be handled manually, send a message to the support to complete your registration.",
+        });
+      }
 
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(totalFees.total * 100),
