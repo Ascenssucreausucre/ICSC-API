@@ -96,7 +96,7 @@ exports.sendMessage = async (req, res) => {
               where: { endpoint: userKeys.endpoint },
             });
           }
-          console.error({ error: error.message });
+          console.error(error);
         }
       }
     }
