@@ -91,7 +91,7 @@ exports.sendMessage = async (req, res) => {
             JSON.stringify(payload)
           );
         } catch (error) {
-          if (err.statusCode === 410 || err.statusCode === 404) {
+          if (error.statusCode === 410 || error.statusCode === 404) {
             await PushSubscription.destroy({
               where: { endpoint: userKeys.endpoint },
             });
@@ -136,7 +136,7 @@ exports.sendMessage = async (req, res) => {
     return res.status(201).json({ message, conversationId: conversation.id });
   } catch (error) {
     console.error("Error while sending the message:", error);
-    return res.status(500).json({ message: `Server error: ${error.message}` });
+    return res.status(500).json({ error: `Server error: ${error.message}` });
   }
 };
 
