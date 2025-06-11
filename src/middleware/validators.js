@@ -492,6 +492,37 @@ exports.verifyUserUpdate = [
     .isString()
     .withMessage("Author's PIN has to be a number."),
 ];
+exports.verifyContact = [
+  body("name")
+    .notEmpty()
+    .withMessage("Please enter the contact's name.")
+    .isString()
+    .withMessage("Name must be sent as strings."),
+  body("surname")
+    .notEmpty()
+    .withMessage("Please enter the contact's surname.")
+    .isString()
+    .withMessage("Surname must be sent as strings."),
+  body("role")
+    .optional()
+    .isString()
+    .withMessage("Role must be sent as strings."),
+  body("email")
+    .notEmpty()
+    .withMessage("Please enter the contact's email adress.")
+    .isEmail()
+    .withMessage("Wrong email format given."),
+  body("tel")
+    .notEmpty()
+    .withMessage("Please enter the contact's phone number.")
+    .isMobilePhone()
+    .withMessage("Wrong phone number format given."),
+  body("conference_id")
+    .notEmpty()
+    .withMessage("The contact has to belong to a conference.")
+    .isInt()
+    .withMessage("Conference id has to be a valid integer."),
+];
 
 // Étape 2 : middleware d'erreurs
 exports.handleValidationErrors = (req, res, next) => {

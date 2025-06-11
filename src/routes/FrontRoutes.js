@@ -22,6 +22,8 @@ const {
   FeeCategory,
   AdditionalFee,
   PaymentOption,
+  Sponsor,
+  Contact,
 } = require("../models");
 const { Op } = require("sequelize");
 const {
@@ -73,11 +75,17 @@ router.get("/navbar-data", getCurrentConference, async (req, res) => {
     res.status(error.statusCode || 500).json({ error: error.message });
   }
 });
-router.get(
-  "/footer-data",
-  getCurrentConference,
-  SponsorController.getSponsorsByConference
-);
+router.get("/footer-data", getCurrentConference, async (req, res) => {
+  const { conference_id } = req.params;
+  try {
+    const sponsors = await Sponsor.getAll({ where: { conference_id } });
+    const contacts = await Contact.getAll({ where: { conference_id } });
+    res.status(200).json({ sponsors, contacts });
+  } catch (error) {
+    console.error(error);
+    res.status(error.statusCode || 500).json({ error: error.message });
+  }
+});
 
 router.get("/get-everything-by-conference/:id", async (req, res) => {
   try {
@@ -129,6 +137,8 @@ router.get("/get-everything-by-conference/:id", async (req, res) => {
       content: topic.contents.map((c) => c.text),
     }));
 
+    const contacts = await Contact.findAll({ where: { conference_id: id } });
+
     res.status(200).json({
       conference: conferenceData,
       articles: articlesData,
@@ -144,6 +154,7 @@ router.get("/get-everything-by-conference/:id", async (req, res) => {
       workshops: workshops,
       localInformations: localInformations,
       paymentOptions: paymentOptions,
+      contacts: contacts,
     });
   } catch (error) {
     console.error("Error fetching homepage data:", error);

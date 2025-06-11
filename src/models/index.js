@@ -23,6 +23,7 @@ async function syncModels() {
   try {
     await models.Conference.sync();
 
+    await models.Contact.sync({ alter: true });
     await models.Topic.sync();
     await models.RegistrationFee.sync();
     await models.News.sync();
@@ -35,7 +36,7 @@ async function syncModels() {
     await models.PlenarySession.sync();
     await models.AdditionalFee.sync();
     await models.Author.sync();
-    await models.User.sync({ alter: true });
+    await models.User.sync();
     await models.FeeCategory.sync();
     await models.CommitteeMember.sync();
     await models.CommitteeRole.sync();
@@ -45,10 +46,10 @@ async function syncModels() {
     await models.PlenarySessionAuthors.sync();
     await models.SpecialSessionAuthors.sync();
     await models.ArticleAuthors.sync();
-    await models.PushSubscription.sync({ alter: true });
+    await models.PushSubscription.sync();
     await models.Conversation.sync();
     await models.Message.sync();
-    await models.PaymentOption.sync({ alter: true });
+    await models.PaymentOption.sync();
 
     console.log("✅ Base de données synchronisée");
   } catch (err) {
