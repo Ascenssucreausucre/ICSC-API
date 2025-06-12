@@ -1,5 +1,6 @@
 // middlewares/validators.js
 const { body, validationResult } = require("express-validator");
+const { isValidPhoneNumber } = require("libphonenumber-js");
 
 // Étape 1 : règles de validation
 exports.verifyConference = [
@@ -515,7 +516,7 @@ exports.verifyContact = [
   body("tel")
     .notEmpty()
     .withMessage("Please enter the contact's phone number.")
-    .isMobilePhone()
+    .custom((value) => isValidPhoneNumber(value))
     .withMessage("Wrong phone number format given."),
   body("conference_id")
     .notEmpty()

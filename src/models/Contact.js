@@ -19,7 +19,7 @@ module.exports = (sequelize) => {
         },
       },
       tel: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.CHAR(20),
         allowNull: false,
       },
       role: {

@@ -15,8 +15,16 @@ module.exports = (sequelize) => {
           min: { args: [2000], msg: "Year can't be smaller than 2000." },
         },
       },
-      title: { type: DataTypes.STRING, allowNull: false },
-      acronym: { type: DataTypes.STRING, allowNull: false },
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "International Conference on Systems and Controls",
+      },
+      acronym: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "ICSC",
+      },
       conference_index: {
         type: DataTypes.INTEGER,
         allowNull: false,

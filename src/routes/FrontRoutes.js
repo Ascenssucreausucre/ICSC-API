@@ -55,34 +55,30 @@ router.get("/homepage-data", getCurrentConference, async (req, res) => {
   }
 });
 
-router.get("/navbar-data", getCurrentConference, async (req, res) => {
+router.get("/public-data", getCurrentConference, async (req, res) => {
+  const { conference_id } = req.params;
+
   try {
     const conferenceData =
       await ConferenceController.getCurrentConferenceData();
     const importantDatesData =
       await ImportantDatesController.getCurrentImportantDatesData(
-        req.params.conference_id
-      ); // Assure-toi que tu passes un ID valide pour la conférence si nécessaire
+        conference_id
+      );
     const newsData = await NewsController.getNewsByTimeStampData();
+
+    const sponsors = await Sponsor.findAll({ where: { conference_id } });
+    const contacts = await Contact.findAll({ where: { conference_id } });
 
     res.status(200).json({
       conferenceData,
       importantDatesData,
       newsData,
+      sponsors,
+      contacts,
     });
   } catch (error) {
-    console.error("Error fetching homepage data:", error);
-    res.status(error.statusCode || 500).json({ error: error.message });
-  }
-});
-router.get("/footer-data", getCurrentConference, async (req, res) => {
-  const { conference_id } = req.params;
-  try {
-    const sponsors = await Sponsor.getAll({ where: { conference_id } });
-    const contacts = await Contact.getAll({ where: { conference_id } });
-    res.status(200).json({ sponsors, contacts });
-  } catch (error) {
-    console.error(error);
+    console.error("Error fetching public data:", error);
     res.status(error.statusCode || 500).json({ error: error.message });
   }
 });

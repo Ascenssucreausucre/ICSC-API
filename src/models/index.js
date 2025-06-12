@@ -21,7 +21,7 @@ Object.keys(models).forEach((modelName) => {
 
 async function syncModels() {
   try {
-    await models.Conference.sync();
+    await models.Conference.sync({ alter: true });
 
     await models.Contact.sync({ alter: true });
     await models.Topic.sync();

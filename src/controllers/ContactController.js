@@ -54,13 +54,14 @@ exports.getByConference = async (req, res) => {
   }
 };
 exports.update = async (req, res) => {
-  const { email, tel, name, surname, role, id } = req.body;
+  const { email, tel, name, surname, role } = req.body;
+  const { id } = req.params;
   try {
     const contact = await Contact.findByPk(id);
-    if (contact) {
-      res.status(404).json({ error: `No contact found with id: ${id}` });
+    if (!contact) {
+      return res.status(404).json({ error: `No contact found with id: ${id}` });
     }
-    await contact.update({ email, tel, name, surname, name, role });
+    await contact.update({ email, tel, name, surname, role });
     res.status(200).json({ message: "Contact successfully updated" });
   } catch (error) {
     console.error(error);
