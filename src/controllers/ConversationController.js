@@ -70,33 +70,33 @@ exports.sendMessage = async (req, res) => {
     if (message.senderType !== "user") {
       const userId = conversation.userId;
 
-      const userKeys = await PushSubscription.findOne({ where: { userId } });
+      const userKeys = await PushSubscription.findAll({ where: { userId } });
 
-      if (userKeys) {
+      if (userKeys.length > 0) {
         const payload = {
           title: "New message",
           body: `Admin: ${message.content}`,
           tag: `newMessage_${userId}`,
         };
-        try {
-          await webPush.sendNotification(
-            {
-              endpoint: userKeys.endpoint,
-              expirationTime: userKeys.expirationTime,
-              keys: {
-                p256dh: userKeys.p256dh,
-                auth: userKeys.auth,
+        for (const user in userKeys) {
+          try {
+            await webPush.sendNotification(
+              {
+                endpoint: user.endpoint,
+                expirationTime: user.expirationTime,
+                keys: {
+                  p256dh: user.p256dh,
+                  auth: user.auth,
+                },
               },
-            },
-            JSON.stringify(payload)
-          );
-        } catch (error) {
-          if (error.statusCode === 410 || error.statusCode === 404) {
-            await PushSubscription.destroy({
-              where: { endpoint: userKeys.endpoint },
-            });
+              JSON.stringify(payload)
+            );
+          } catch (error) {
+            if (error.statusCode === 410 || error.statusCode === 404) {
+              await user.destroy;
+            }
+            console.error(error);
           }
-          console.error(error);
         }
       }
     }

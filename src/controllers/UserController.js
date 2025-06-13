@@ -319,31 +319,41 @@ exports.unlinkAuthor = async (req, res) => {
         error: "This user has no author to unlink.",
       });
     }
-    const userPush = await PushSubscription.findOne({
+    const userPushSubscriptions = await PushSubscription.findAll({
       where: { userId: user.id },
     });
-    if (userPush) {
+
+    if (userPushSubscriptions.length > 0) {
       const payload = {
         title: "Your account is no longer linked to an author.",
         body: `The administration team has decided to unlink the author your account has been linked to, due to a suspicion of usurpating someone else's identity.`,
         tag: `unlinkAuthor_${user.id}`,
       };
-      try {
-        await webPush.sendNotification(
-          {
-            endpoint: userPush.endpoint,
-            expirationTime: userPush.expirationTime,
-            keys: {
-              p256dh: userPush.p256dh,
-              auth: userPush.auth,
+
+      for (const sub of userPushSubscriptions) {
+        try {
+          await webPush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              expirationTime: sub.expirationTime,
+              keys: {
+                p256dh: sub.p256dh,
+                auth: sub.auth,
+              },
             },
-          },
-          JSON.stringify(payload)
-        );
-      } catch (error) {
-        console.error(error.message);
+            JSON.stringify(payload)
+          );
+        } catch (error) {
+          console.error(
+            `Failed to send push to ${sub.endpoint}: ${error.message}`
+          );
+          if (error.statusCode === 410 || error.statusCode === 404) {
+            await sub.destroy();
+          }
+        }
       }
     }
+
     await user.update({ author_id: null });
     res.status(200).json({ message: "Author has been successfully reset." });
   } catch (error) {
