@@ -37,7 +37,7 @@ exports.sendMessage = async (req, res) => {
         conversation.throttling === true
       ) {
         return res.status(429).json({
-          message: "Please wait at least 1 minute between messages.",
+          error: "Please wait at least 1 minute between messages.",
         });
       }
     } else if (senderType === "admin" || senderType === "superadmin") {
@@ -48,7 +48,7 @@ exports.sendMessage = async (req, res) => {
       if (!conversation) {
         return res
           .status(404)
-          .json({ message: "No conversation found with id " + conversationId });
+          .json({ error: "No conversation found with id " + conversationId });
       }
     }
 
@@ -157,7 +157,7 @@ exports.getUserConversation = async (req, res) => {
     });
 
     if (!conversation) {
-      return res.status(404).json({ message: "No conversation found." });
+      return res.status(404).json({ error: "No conversation found." });
     }
 
     await conversation.update({ unreadByUser: false });
@@ -171,7 +171,7 @@ exports.getUserConversation = async (req, res) => {
     console.error("Error while retreiving conversation :", error);
     return res
       .status(500)
-      .json({ message: `Internal server error : ${error.message}` });
+      .json({ error: `Internal server error : ${error.message}` });
   }
 };
 exports.getConversation = async (req, res) => {
@@ -195,7 +195,7 @@ exports.getConversation = async (req, res) => {
     });
 
     if (!conversation) {
-      return res.status(404).json({ message: "No conversation found." });
+      return res.status(404).json({ error: "No conversation found." });
     }
 
     await conversation.update({ unreadByAdmin: false });
@@ -217,7 +217,7 @@ exports.getConversation = async (req, res) => {
     console.error("Error while retreiving conversation :", error);
     return res
       .status(500)
-      .json({ message: `Internal server error : ${error.message}` });
+      .json({ error: `Internal server error : ${error.message}` });
   }
 };
 
@@ -302,7 +302,7 @@ exports.getAdminConversations = async (req, res) => {
     return res.status(200).json({ results: conversations, total: count });
   } catch (error) {
     console.error("Error fetching conversations:", error);
-    return res.status(500).json({ message: `Server error: ${error.message}` });
+    return res.status(500).json({ error: `Server error: ${error.message}` });
   }
 };
 
@@ -328,7 +328,7 @@ exports.archiveConversation = async (req, res) => {
       ],
     });
     if (!conversation) {
-      return res.status(404).json({ message: "No conversation found." });
+      return res.status(404).json({ error: "No conversation found." });
     }
 
     conversation.archived = !conversation.archived;
@@ -347,7 +347,7 @@ exports.archiveConversation = async (req, res) => {
     });
   } catch (error) {
     console.error("Error :", error);
-    return res.status(500).json({ message: `Server error: ${error.message}` });
+    return res.status(500).json({ error: `Server error: ${error.message}` });
   }
 };
 exports.deleteConversation = async (req, res) => {
@@ -364,7 +364,7 @@ exports.deleteConversation = async (req, res) => {
     res.status(200).json({ message: "Conversation successfully deleted." });
   } catch (error) {
     console.error("Error :", error);
-    return res.status(500).json({ message: `Server error: ${error.message}` });
+    return res.status(500).json({ error: `Server error: ${error.message}` });
   }
 };
 exports.deleteArchivedConversations = async (req, res) => {
@@ -384,7 +384,7 @@ exports.deleteArchivedConversations = async (req, res) => {
     });
   } catch (error) {
     console.error("Error :", error);
-    return res.status(500).json({ message: `Server error: ${error.message}` });
+    return res.status(500).json({ error: `Server error: ${error.message}` });
   }
 };
 
@@ -412,6 +412,6 @@ exports.toggleThrottling = async (req, res) => {
     });
   } catch (error) {
     console.error("Error :", error);
-    return res.status(500).json({ message: `Server error: ${error.message}` });
+    return res.status(500).json({ error: `Server error: ${error.message}` });
   }
 };
