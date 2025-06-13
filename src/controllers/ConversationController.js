@@ -78,7 +78,7 @@ exports.sendMessage = async (req, res) => {
           body: `Admin: ${message.content}`,
           tag: `newMessage_${userId}`,
         };
-        for (const user in userKeys) {
+        for (const user of userKeys) {
           try {
             await webPush.sendNotification(
               {
