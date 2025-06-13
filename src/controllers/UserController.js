@@ -1,7 +1,8 @@
-const { User, Author, Article } = require("../models");
+const { User, Author, Article, PushSubscription } = require("../models");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
+const webPush = require("../utils/webPush");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -317,6 +318,31 @@ exports.unlinkAuthor = async (req, res) => {
       return res.status(400).json({
         error: "This user has no author to unlink.",
       });
+    }
+    const userPush = await PushSubscription.findOne({
+      where: { userId: user.id },
+    });
+    if (userPush) {
+      const payload = {
+        title: "Your account is no longer linked to an author.",
+        body: `The administration team has decided to unlink the author your account has been linked to, due to a suspicion of usurpating someone else's identity.`,
+        tag: `unlinkAuthor_${user.id}`,
+      };
+      try {
+        await webPush.sendNotification(
+          {
+            endpoint: userPush.endpoint,
+            expirationTime: userPush.expirationTime,
+            keys: {
+              p256dh: userPush.p256dh,
+              auth: userPush.auth,
+            },
+          },
+          JSON.stringify(payload)
+        );
+      } catch (error) {
+        console.error(error.message);
+      }
     }
     await user.update({ author_id: null });
     res.status(200).json({ message: "Author has been successfully reset." });
