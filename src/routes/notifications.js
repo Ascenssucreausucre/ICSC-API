@@ -18,21 +18,21 @@ router.post("/subscribe", authenticateAny, async (req, res) => {
       userId: id,
     });
 
-    // Envoi notification de bienvenue (non bloquant)
+    // Sending welcome notification
     const payload = JSON.stringify({
-      title: "Bienvenue ! 🔔",
-      body: "Tu recevras désormais les notifications.",
+      title: "Welcome ! 🔔",
+      body: "You will now receive notifications.",
       url: "/",
     });
 
     webpush.sendNotification(req.body, payload).catch((err) => {
-      console.error("Échec de l'envoi de la notification :", err.message);
+      console.error("Error while sending the notification :", err.message);
     });
 
-    res.status(201).json({ message: "Abonnement enregistré." });
+    res.status(201).json({ message: "Subsription saved." });
   } catch (err) {
-    console.error("Erreur d'enregistrement :", err);
-    res.status(500).json({ error: "Erreur serveur." });
+    console.error("Saving error :", err);
+    res.status(500).json(err.message);
   }
 });
 
@@ -104,7 +104,7 @@ router.post("/notify-all", authenticateAdmin, async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ error: "Erreur récupération souscriptions." });
+      .json({ error: "Error while finding subscriptions." });
   }
 
   // Préparer le payload complet à envoyer au service worker
@@ -153,6 +153,25 @@ router.post("/notify-all", authenticateAdmin, async (req, res) => {
   res
     .status(200)
     .json({ message: "Notifications successfully sent!", results });
+});
+
+router.get("/status", authenticateAny, async (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required" });
+  }
+
+  try {
+    const isUserSubscribed = await PushSubscription.findOne({
+      where: { userId },
+      attributes: ["id"],
+    });
+
+    return res.status(200).json({ subscribed: Boolean(isUserSubscribed) });
+  } catch (error) {
+    console.error("Error checking push subscription status:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 module.exports = router;

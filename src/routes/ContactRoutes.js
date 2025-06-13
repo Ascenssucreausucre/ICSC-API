@@ -29,6 +29,6 @@ router.put(
   handleValidationErrors,
   ContactController.update
 );
-router.delete("/", authenticateAdmin, ContactController.delete);
+router.delete("/:id", authenticateAdmin, ContactController.delete);
 
 module.exports = router;

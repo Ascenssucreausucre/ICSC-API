@@ -88,10 +88,10 @@ exports.logIn = async (req, res) => {
     });
 
     res.cookie("token", token, {
-      httpOnly: true, // Protège contre XSS
-      secure: process.env.NODE_ENV === "production", // En prod, le cookie ne sera envoyé qu'en HTTPS
-      sameSite: "Strict", // Protège contre CSRF
-      maxAge: 60 * 60 * 1000, // Expire après 1 heure
+      httpOnly: true, // Protect against XSS
+      secure: process.env.NODE_ENV === "production", // Secure in production
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict", // Protect against CSRF
+      maxAge: 60 * 60 * 1000, // Expire after 1h
     });
 
     res.status(200).json({

@@ -14,7 +14,7 @@ exports.createArticle = async (req, res) => {
 
   try {
     const result = await Article.sequelize.transaction(async (t) => {
-      // Vérifie que les auteurs existent
+      // Verify user existence
       const authorIds = authors.map((a) => a.id);
 
       const existingAuthors = await Author.findAll({
@@ -26,10 +26,10 @@ exports.createArticle = async (req, res) => {
         throw new Error("One or more authors do not exist");
       }
 
-      // Crée l'article
+      // Creating the article
       const newArticle = await Article.create(articleData, { transaction: t });
 
-      // Associe les auteurs
+      // Assiciating authors
       await newArticle.setAuthors(authorIds, { transaction: t });
 
       return { newArticle, existingAuthors };
@@ -52,7 +52,7 @@ exports.createArticle = async (req, res) => {
   }
 };
 
-// Méthode Data pour récupérer tous les articles
+// Data methods for routes that send multiple models
 exports.findAllArticlesData = async () => {
   return await Article.findAll({
     include: {
@@ -90,7 +90,6 @@ exports.findArticlesByConference = async (req, res) => {
   }
 };
 
-// Endpoint HTTP pour récupérer tous les articles
 exports.findAllArticles = async (req, res) => {
   try {
     const allArticles = await exports.findAllArticlesData();
@@ -100,32 +99,28 @@ exports.findAllArticles = async (req, res) => {
   }
 };
 
-// Méthode Data pour trouver les articles par auteur
 exports.findArticleByAuthorData = async (authorId) => {
-  // Trouver tous les articles associés à cet auteur
   const articles = await Article.findAll({
     include: {
       model: Author,
-      as: "authors", // Assurez-vous que l'alias est bien "authors"
-      where: { id: authorId }, // Filtrer les articles où l'auteur correspond à l'ID
-      required: true, // Cela assure qu'on ne récupère que les articles ayant cet auteur
+      as: "authors",
+      where: { id: authorId },
+      required: true,
     },
   });
 
-  // Si aucun article n'est trouvé pour cet auteur
   if (articles.length === 0) {
     const error = new Error("No articles found for this author");
     error.statusCode = 404;
     throw error;
   }
 
-  // Rechercher tous les auteurs associés à chaque article
   const articlesWithAllAuthors = await Promise.all(
     articles.map(async (article) => {
       return await Article.findByPk(article.id, {
         include: {
           model: Author,
-          as: "authors", // Inclure tous les auteurs de l'article
+          as: "authors",
         },
       });
     })
@@ -134,7 +129,6 @@ exports.findArticleByAuthorData = async (authorId) => {
   return articlesWithAllAuthors;
 };
 
-// Endpoint HTTP pour trouver les articles par auteur
 exports.findArticleByAuthor = async (req, res) => {
   try {
     const { authorId } = req.params;
@@ -167,35 +161,30 @@ exports.deleteArticleById = async (req, res) => {
 exports.updateArticle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, affiliation, authors } = req.body; // `authors` est un tableau d'IDs d'auteurs
+    const { title, affiliation, authors } = req.body;
 
     const authorsIds = authors.map((a) => a.id);
 
-    // 1️⃣ Trouver l'article à mettre à jour
     const articleToUpdate = await Article.findByPk(id, {
-      include: { model: Author, as: "authors" }, // Inclure les auteurs actuels
+      include: { model: Author, as: "authors" },
     });
 
     if (!articleToUpdate) {
       return res.status(404).json({ error: "Article not found" });
     }
 
-    // 2️⃣ Mettre à jour les autres champs
     articleToUpdate.title = title || articleToUpdate.title;
     articleToUpdate.affiliation = affiliation || articleToUpdate.affiliation;
     await articleToUpdate.save();
 
-    // 3️⃣ Mettre à jour les auteurs si renseigné
     if (authorsIds && Array.isArray(authorsIds)) {
-      const currentAuthorIds = articleToUpdate.authors.map((a) => a.id); // IDs actuels
-      const newAuthorIds = authorsIds; // Nouveaux IDs fournis
+      const currentAuthorIds = articleToUpdate.authors.map((a) => a.id);
+      const newAuthorIds = authorsIds;
 
-      // Vérifier si tous les nouveaux auteurs existent
       const authorsExist = await Author.findAll({
         where: { id: newAuthorIds },
       });
 
-      // Si l'un des auteurs n'existe pas, renvoyer une erreur 404 avec l'ID manquant
       const existingAuthorIds = authorsExist.map((author) => author.id);
       const notFoundAuthors = newAuthorIds.filter(
         (id) => !existingAuthorIds.includes(id)
@@ -207,22 +196,18 @@ exports.updateArticle = async (req, res) => {
         });
       }
 
-      // Trouver les auteurs à AJOUTER (ceux qui ne sont pas encore liés)
       const authorsToAdd = newAuthorIds.filter(
         (id) => !currentAuthorIds.includes(id)
       );
 
-      // Trouver les auteurs à SUPPRIMER (ceux qui ne sont plus dans la liste)
       const authorsToRemove = currentAuthorIds.filter(
         (id) => !newAuthorIds.includes(id)
       );
 
-      // Ajouter les nouveaux auteurs
       if (authorsToAdd.length > 0) {
         await articleToUpdate.addAuthors(authorsToAdd);
       }
 
-      // Supprimer les auteurs non inclus dans la nouvelle liste
       if (authorsToRemove.length > 0) {
         await articleToUpdate.removeAuthors(authorsToRemove);
       }
@@ -267,14 +252,13 @@ exports.updateArticleStatus = async (req, res) => {
 
 exports.bulkUpdateArticleStatus = async (req, res) => {
   try {
-    const { ids } = req.body; // Le tableau d'IDs doit être dans le corps de la requête
+    const { ids } = req.body;
     const { status } = req.body;
 
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ error: "IDs must be a non-empty array." });
     }
 
-    // Trouver tous les articles correspondant aux IDs
     const articles = await Article.findAll({ where: { id: ids } });
 
     if (articles.length === 0) {
@@ -282,8 +266,6 @@ exports.bulkUpdateArticleStatus = async (req, res) => {
         .status(404)
         .json({ error: "No articles found for the provided IDs." });
     }
-
-    // Mettre à jour le statut pour tous les articles
     await Promise.all(
       articles.map((article) => {
         article.status = status;

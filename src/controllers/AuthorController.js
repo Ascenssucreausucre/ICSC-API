@@ -166,7 +166,6 @@ exports.searchAuthors = async (req, res) => {
       }));
     }
 
-    // On récupère tous les auteurs qui correspondent à la recherche
     const authors = await Author.findAll({
       where: whereClause,
       order: [["surname", "ASC"]],
@@ -178,7 +177,6 @@ exports.searchAuthors = async (req, res) => {
       },
     });
 
-    // Filtrage par nombre d’articles
     const filteredAuthors = authors.filter((author) => {
       const articleCount = author.articles.length;
       if (minArticles && articleCount < parseInt(minArticles)) return false;
@@ -186,7 +184,6 @@ exports.searchAuthors = async (req, res) => {
       return true;
     });
 
-    // Pagination manuelle après filtrage
     const paginatedResults = filteredAuthors.slice(
       offset,
       offset + parseInt(limit)

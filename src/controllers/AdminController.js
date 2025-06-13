@@ -5,7 +5,7 @@ const { Admin } = require("../models");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 /**
- * Connexion d'un administrateur
+ * Admin connexion
  */
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -22,17 +22,17 @@ exports.login = async (req, res) => {
       return res.status(401).json({ error: "Invalid password" });
     }
 
-    // Générer un JWT
+    // Generate a JWT
     const token = jwt.sign({ id: admin.id, role: admin.role }, JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    // 🔥 Envoyer le token dans un cookie HttpOnly
+    // Sending the token with cookies
     res.cookie("token", token, {
-      httpOnly: true, // Protège contre XSS
-      secure: process.env.NODE_ENV === "production", // En prod, le cookie ne sera envoyé qu'en HTTPS
-      sameSite: "Strict", // Protège contre CSRF
-      maxAge: 60 * 60 * 1000, // Expire après 1 heure
+      httpOnly: true, // Protect against XSS
+      secure: process.env.NODE_ENV === "production", // Secure in production
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict", // Protect against CSRF
+      maxAge: 60 * 60 * 1000, // Expire after 1h
     });
 
     res.status(200).json({ message: "Login successful" });
@@ -43,15 +43,15 @@ exports.login = async (req, res) => {
 };
 
 /**
- * Déconnexion d'un administrateur
+ * Deconnexion
  */
 exports.logout = async (req, res) => {
-  res.clearCookie("token"); // Supprime le cookie
+  res.clearCookie("token"); // Deleting cookie
   res.status(200).json({ message: "Logged out successfully" });
 };
 
 /**
- * Vérifier si un admin est toujours connecté
+ * Check if the admin is still authenticated
  */
 exports.checkAuth = async (req, res) => {
   if (req.cookies?.token) {
