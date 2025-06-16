@@ -12,7 +12,13 @@ const server = http.createServer(app);
 
 // Middlewares
 app.use(cookieParser());
-app.use(express.json());
+app.use((req, res, next) => {
+  if (req.originalUrl === "/api/stripe/webhook") {
+    next();
+  } else {
+    express.json()(req, res, next);
+  }
+});
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("public/uploads"));
 
