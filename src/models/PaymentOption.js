@@ -37,6 +37,14 @@ module.exports = (sequelize) => {
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     });
+
+    PaymentOption.belongsToMany(models.Registration, {
+      through: "registrationoptions",
+      foreignKey: "paymentoption_id",
+      as: "registration",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
   };
   return PaymentOption;
 };

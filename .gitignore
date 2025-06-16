@@ -1,0 +1,6 @@
+.env
+node_modules
+public
+src/utils/generateVapidKeys.js
+src/utils/generateSQLAdmin.js
+package-lock.json

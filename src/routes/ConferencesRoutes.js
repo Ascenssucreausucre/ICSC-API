@@ -8,6 +8,7 @@ const {
   verifyConference,
   handleValidationErrors,
 } = require("../middleware/validators");
+const getCurrentConference = require("../middleware/getCurrentConference");
 
 const uploadBanner = createUploader({
   folder: "conference-banners",
@@ -38,6 +39,12 @@ router.put(
   "/:id/setCurrent",
   authenticateAdmin,
   ConferenceController.setCurrentConference
+);
+router.put(
+  "/toggle-registrations",
+  authenticateAdmin,
+  getCurrentConference,
+  ConferenceController.toggleRegistrations
 );
 router.delete(
   "/delete/:id",

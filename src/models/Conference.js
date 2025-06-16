@@ -53,6 +53,11 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: "#4736a8",
       },
+      registrations_open: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
     },
     {
       tableName: "conferences",

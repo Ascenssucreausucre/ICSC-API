@@ -21,6 +21,7 @@ exports.getAllConferences = async (req, res) => {
     const conferences = await exports.getAllConferencesData();
     res.json(conferences);
   } catch (error) {
+    console.error(error.message);
     res.status(error.statusCode || 500).json({ error: error.message });
   }
 };
@@ -49,6 +50,7 @@ exports.getConferenceById = async (req, res) => {
     );
     res.json(targetedConference);
   } catch (error) {
+    console.error(error.message);
     res.status(error.statusCode || 500).json({ error: error.message });
   }
 };
@@ -77,6 +79,7 @@ exports.getCurrentConference = async (req, res) => {
     const currentConference = await exports.getCurrentConferenceData();
     res.status(200).json(currentConference);
   } catch (error) {
+    console.error(error.message);
     res.status(error.statusCode || 500).json({ error: error.message });
   }
 };
@@ -122,6 +125,7 @@ exports.createConference = async (req, res) => {
       newItem: targetedConference,
     });
   } catch (error) {
+    console.error(error.message);
     if (banner) {
       try {
         await fsp.unlink(path.join(__dirname, "../../public/uploads", banner));
@@ -207,6 +211,7 @@ exports.updateConference = async (req, res) => {
     });
   } catch (error) {
     await transaction.rollback();
+    console.error(error.message);
 
     // Supprimer le nouveau fichier s’il a été uploadé
     if (req.file) {
@@ -245,6 +250,7 @@ exports.setCurrentConference = async (req, res) => {
       message: `${conferenceToUpdate.acronym}'${conferenceToUpdate.year} is now set as current.`,
     });
   } catch (error) {
+    console.error(error.message);
     res.status(500).json({ error: error.message });
   }
 };
@@ -276,6 +282,31 @@ exports.deleteConference = async (req, res) => {
       message: `Conference ${conferenceToDelete.acronym}'${conferenceToDelete.year} successfully deleted.`,
     });
   } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.toggleRegistrations = async (req, res) => {
+  const { conference_id } = req.params;
+  try {
+    const conference = await Conference.findByPk(conference_id);
+    if (!conference) {
+      return res
+        .status(404)
+        .json({ error: `No conference found with id: ${conference_id}.` });
+    }
+    const newregistrationState = !conference?.registrations_open;
+
+    await conference.update({ registrations_open: newregistrationState });
+
+    return res.status(200).json({
+      message: newregistrationState
+        ? "Registrations has been successfully opened!"
+        : "Registrations has been closed.",
+    });
+  } catch (error) {
+    console.error(error.message);
     res.status(500).json({ error: error.message });
   }
 };

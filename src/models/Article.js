@@ -30,6 +30,15 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: "Contributed",
       },
+      registration_id: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: "registrations",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      },
       conference_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -54,6 +63,15 @@ module.exports = (sequelize) => {
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     });
+    Article.associate = (models) => {
+      Article.belongsTo(models.Registration, {
+        foreignKey: "registration_id",
+        as: "registration",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+    };
+
     Article.belongsTo(models.Conference, {
       foreignKey: "conference_id",
       as: "conference",

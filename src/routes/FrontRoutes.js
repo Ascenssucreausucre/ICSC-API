@@ -24,6 +24,8 @@ const {
   PaymentOption,
   Sponsor,
   Contact,
+  Conference,
+  Registration,
 } = require("../models");
 const { Op } = require("sequelize");
 const {
@@ -162,7 +164,8 @@ router.get(
   "/registration-fees/current",
   getCurrentConference,
   async (req, res) => {
-    const conference_id = req.params.conference_id;
+    const { conference_id } = req.params;
+    console.log("✅ Good route toggled");
     try {
       const fees =
         await RegistrationFeeController.getCurrentRegistrationFeesWithCategoriesData(
@@ -176,13 +179,21 @@ router.get(
           conference_id
         );
       const options = await PaymentOption.findAll({ where: { conference_id } });
+      const conference = await Conference.findByPk(conference_id, {
+        attributes: ["registrations_open"],
+      });
+
+      const registrations_open = conference?.registrations_open;
+
       res.status(200).json({
         additionalFees,
         importantDates: dates,
         registrationFees: fees,
         paymentOptions: options,
+        registrations_open,
       });
     } catch (error) {
+      console.error("Error:", error.message);
       res.status(error.statusCode || 500).json({ error: error.message });
     }
   }
@@ -249,8 +260,18 @@ router.post(
       paypal,
       options,
       student,
+      name,
+      surname,
     } = req.body;
     try {
+      const conference = await Conference.findByPk(conference_id, {
+        attributes: ["registrations_open"],
+      });
+      if (!conference?.registrations_open) {
+        return res
+          .status(401)
+          .json({ error: "Registrations are not opened yet." });
+      }
       let articleIds = [];
       let optionIds = [];
 
@@ -275,6 +296,10 @@ router.post(
         },
       });
 
+      const areArticlesRegistered = existingArticles.find(
+        (article) => article?.registration_id !== null
+      );
+
       const existingOptions = await PaymentOption.findAll({
         where: {
           id: {
@@ -289,6 +314,12 @@ router.post(
           missingIds: articleIds.filter(
             (id) => !existingArticles.find((article) => article.id === id)
           ),
+        });
+      }
+
+      if (areArticlesRegistered) {
+        return res.status(401).json({
+          error: `Article ${areArticlesRegistered?.title} has already been registered.`,
         });
       }
 
@@ -404,8 +435,24 @@ router.post(
         });
       }
 
-      const paymentIntent = await stripe.paymentIntents.create({
+      const stripeMetadata = {
+        email,
+        conference_id,
+        article_ids: JSON.stringify(articleIds),
+        options_ids: JSON.stringify(optionIds),
+        name,
+        surname,
+        country,
+        student,
+        ieee_member: ieeeMember,
+        online: attendanceMode.toLowerCase() === "online",
         amount: Math.round(totalFees.total * 100),
+      };
+
+      console.log("📤 Data sent to stripe :", stripeMetadata);
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: stripeMetadata.amount,
         currency: "eur",
         payment_method_types: ["card"],
         payment_method_options: {
@@ -413,6 +460,7 @@ router.post(
             request_three_d_secure: "automatic",
           },
         },
+        metadata: stripeMetadata,
       });
 
       return res.status(200).json({

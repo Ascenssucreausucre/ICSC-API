@@ -5,7 +5,6 @@ const {
   Conference,
 } = require("../models");
 
-// Méthode Data pour récupérer les comités actuels
 exports.getCurrentCommitteesData = async (conference_id) => {
   return await Committee.findAll({
     where: { conference_id },
@@ -22,7 +21,6 @@ exports.getCurrentCommitteesData = async (conference_id) => {
   });
 };
 
-// Endpoint HTTP pour récupérer les comités actuels
 exports.getCurrentCommittees = async (req, res) => {
   try {
     const committees = await exports.getCurrentCommitteesData(
