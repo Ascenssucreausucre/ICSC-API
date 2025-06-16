@@ -13,7 +13,7 @@ const server = http.createServer(app);
 // Middlewares
 app.use(cookieParser());
 app.use((req, res, next) => {
-  if (req.originalUrl === "/api/stripe/webhook") {
+  if (req.originalUrl === "/api/stripe-webhook") {
     next();
   } else {
     express.json()(req, res, next);
@@ -22,13 +22,18 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("public/uploads"));
 
+const corsOrigin = [
+  "https://icsc.up.railway.app",
+  "https://icsc-conference.netlify.app",
+];
+
+if (process.env.NODE_ENV === "development") {
+  corsOrigin.push("http://localhost:5173");
+}
+
 // CORS
 const corsOptions = {
-  origin: [
-    "http://localhost:5173",
-    "https://icsc.up.railway.app",
-    "https://icsc-conference.netlify.app",
-  ],
+  origin: corsOrigin,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"],
