@@ -1,14 +1,7 @@
 require("dotenv").config();
-const express = require("express");
-const router = express.Router();
 const Stripe = require("stripe");
 const stripe = new Stripe(process.env.STRIPE_PRIVATE_KEY);
-const {
-  Registration,
-  Article,
-  PaymentOptions,
-  sequelize,
-} = require("../models");
+const { Registration, Article, sequelize } = require("../models");
 const { Op } = require("sequelize");
 
 const stripeWebhook = async (req, res) => {
@@ -53,6 +46,7 @@ const stripeWebhook = async (req, res) => {
 
     const transaction = await sequelize.transaction();
     try {
+      console.log("👉 Creating registration...");
       const registration = await Registration.create(
         {
           email,
@@ -67,18 +61,23 @@ const stripeWebhook = async (req, res) => {
         },
         { transaction }
       );
+
+      console.log("👉 Updating articles...");
       await Article.update(
         { registration_id: registration.id },
         {
           where: {
             id: { [Op.in]: articleIds },
           },
-        },
-        { transaction }
+          transaction,
+        }
       );
+
+      console.log("👉 Adding options...");
       await registration.addOptions(optionIds, { transaction });
 
       await transaction.commit();
+      console.log("✅ Transaction complete");
     } catch (error) {
       await transaction.rollback();
       console.error("❌ Registration failed:", error.message);
