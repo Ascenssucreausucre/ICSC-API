@@ -307,7 +307,12 @@ exports.delete = async (req, res) => {
   }
 };
 exports.logOut = async (req, res) => {
-  res.clearCookie("token"); // Supprime le cookie
+  res.clearCookie("token"),
+    {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Strict",
+    };
   res.status(200).json({ message: "Logged out successfully" });
 };
 exports.unlinkAuthor = async (req, res) => {
