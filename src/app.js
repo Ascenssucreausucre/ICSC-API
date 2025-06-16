@@ -10,15 +10,15 @@ const { secureThrottling } = require("./middleware/secureThrottling");
 const app = express();
 const server = http.createServer(app);
 
+app.post(
+  "/api/stripe-webhook",
+  express.raw({ type: "application/json" }),
+  require("./utils/StripeWebhook")
+);
+
 // Middlewares
 app.use(cookieParser());
-app.use((req, res, next) => {
-  if (req.originalUrl === "/api/stripe-webhook") {
-    next();
-  } else {
-    express.json()(req, res, next);
-  }
-});
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("public/uploads"));
 
