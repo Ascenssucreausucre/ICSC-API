@@ -21,40 +21,10 @@ Object.keys(models).forEach((modelName) => {
 
 async function syncModels() {
   try {
-    await models.Conference.sync({ alter: true });
-
-    await models.Contact.sync();
-    await models.Topic.sync();
-    await models.RegistrationFee.sync();
-    await models.News.sync();
-    await models.Registration.sync({ alter: true });
-    await models.Article.sync({ alter: true });
-    await models.Committee.sync();
-    await models.ImportantDates.sync();
-    await models.SpecialSession.sync();
-    await models.Workshop.sync();
-    await models.LocalInformation.sync();
-    await models.PlenarySession.sync();
-    await models.AdditionalFee.sync();
-    await models.Author.sync();
-    await models.User.sync();
-    await models.FeeCategory.sync();
-    await models.CommitteeMember.sync();
-    await models.CommitteeRole.sync();
-    await models.Sponsor.sync();
-    await models.Content.sync();
-    await models.Admin.sync();
-    await models.PlenarySessionAuthors.sync();
-    await models.SpecialSessionAuthors.sync();
-    await models.ArticleAuthors.sync();
-    await models.PushSubscription.sync();
-    await models.Conversation.sync();
-    await models.Message.sync();
-    await models.PaymentOption.sync({ alter: true });
-
-    console.log("✅ Base de données synchronisée");
+    await sequelize.sync({ alter: true });
+    console.log("✅ Database has been usccessfully synchronized!");
   } catch (err) {
-    console.error("❌ Erreur de synchronisation :", err);
+    console.error("❌ Error while synchronizing tables :", err);
   }
 }
 
