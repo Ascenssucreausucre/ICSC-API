@@ -161,7 +161,13 @@ exports.deleteArticleById = async (req, res) => {
 exports.updateArticle = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, affiliation, authors } = req.body;
+    const { title, affiliation, authors, profile } = req.body;
+
+    if (!profile.includes(["Invited", "Contributed"])) {
+      return res.status(401).json({
+        error: "Unauthorized profile. It has to be 'Invited' or 'Contributed'.",
+      });
+    }
 
     const authorsIds = authors.map((a) => a.id);
 
@@ -175,6 +181,7 @@ exports.updateArticle = async (req, res) => {
 
     articleToUpdate.title = title || articleToUpdate.title;
     articleToUpdate.affiliation = affiliation || articleToUpdate.affiliation;
+    articleToUpdate.profile = profile || articleToUpdate.profile;
     await articleToUpdate.save();
 
     if (authorsIds && Array.isArray(authorsIds)) {

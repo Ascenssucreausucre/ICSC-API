@@ -193,11 +193,6 @@ exports.verifyArticle = [
 
   body("title").trim().notEmpty().withMessage("Title can't be empty."),
 
-  body("affiliation")
-    .trim()
-    .notEmpty()
-    .withMessage("Affiliation can't be null."),
-
   body("status")
     .optional()
     .isIn(["pending", "accepted", "rejected"])
