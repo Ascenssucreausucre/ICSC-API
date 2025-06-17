@@ -52,7 +52,7 @@ module.exports = (sequelize) => {
     Registration.hasMany(models.Article, {
       foreignKey: "registration_id",
       as: "articles",
-      onDelete: "CASCADE",
+      onDelete: "SET NULL",
       onUpdate: "CASCADE",
     });
     Registration.belongsToMany(models.PaymentOption, {

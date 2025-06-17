@@ -36,7 +36,7 @@ module.exports = (sequelize) => {
           model: "registrations",
           key: "id",
         },
-        onDelete: "CASCADE",
+        onDelete: "SET NULL",
         onUpdate: "CASCADE",
       },
       conference_id: {
@@ -56,21 +56,20 @@ module.exports = (sequelize) => {
 
   Article.associate = (models) => {
     Article.belongsToMany(models.Author, {
-      through: models.ArticleAuthors, // Utilise le modèle ArticleAuthor pour la table de jonction
+      through: models.ArticleAuthors,
       as: "authors",
       foreignKey: "article_id",
       otherKey: "author_id",
-      onDelete: "CASCADE",
+      onDelete: "SET NULL",
       onUpdate: "CASCADE",
     });
-    Article.associate = (models) => {
-      Article.belongsTo(models.Registration, {
-        foreignKey: "registration_id",
-        as: "registration",
-        onDelete: "CASCADE",
-        onUpdate: "CASCADE",
-      });
-    };
+
+    Article.belongsTo(models.Registration, {
+      foreignKey: "registration_id",
+      as: "registration",
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
+    });
 
     Article.belongsTo(models.Conference, {
       foreignKey: "conference_id",

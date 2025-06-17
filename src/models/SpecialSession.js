@@ -45,7 +45,6 @@ module.exports = (sequelize) => {
       onDelete: "CASCADE",
     });
 
-    // Relation many-to-many avec Author (via une table intermédiaire)
     SpecialSession.belongsToMany(models.Author, {
       through: models.SpecialSessionAuthors,
       as: "authors",

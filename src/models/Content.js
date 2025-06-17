@@ -29,7 +29,6 @@ module.exports = (sequelize) => {
     }
   );
 
-  // Définir la relation entre Topic et Content (un sujet a plusieurs éléments de contenu)
   Content.associate = (models) => {
     Content.belongsTo(models.Topic, {
       foreignKey: "topic_id",

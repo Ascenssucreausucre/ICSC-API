@@ -63,7 +63,6 @@ module.exports = (sequelize) => {
   );
 
   News.associate = (models) => {
-    // Association avec Conference
     News.belongsTo(models.Conference, {
       foreignKey: "conference_id",
       as: "conference",
