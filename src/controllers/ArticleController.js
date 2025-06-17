@@ -163,9 +163,10 @@ exports.updateArticle = async (req, res) => {
     const { id } = req.params;
     const { title, affiliation, authors, profile } = req.body;
 
-    if (!profile.includes(["Invited", "Contributed"])) {
+    if (!["Invited", "Contributed"].includes(profile)) {
       return res.status(401).json({
-        error: "Unauthorized profile. It has to be 'Invited' or 'Contributed'.",
+        error:
+          "Unauthorized profile. It has to be either 'Invited' or 'Contributed'.",
       });
     }
 
