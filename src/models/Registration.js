@@ -25,6 +25,10 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      extraPages: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       amount_paid: {
         type: DataTypes.INTEGER,
         allowNull: false,

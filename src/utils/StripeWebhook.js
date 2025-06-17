@@ -31,6 +31,7 @@ const stripeWebhook = async (req, res) => {
       country,
       amount,
       type,
+      extraPages,
     } = paymentIntent.metadata;
     console.log("📥 Data received by stripe:", paymentIntent.metadata);
 
@@ -51,6 +52,7 @@ const stripeWebhook = async (req, res) => {
           country: parsedCountry.name,
           type,
           amount_paid: parsedAmount / 100,
+          extraPages,
         },
         { transaction }
       );

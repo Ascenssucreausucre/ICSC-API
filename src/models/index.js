@@ -21,7 +21,7 @@ Object.keys(models).forEach((modelName) => {
 
 async function syncModels() {
   try {
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     console.log("✅ Database has been usccessfully synchronized!");
   } catch (err) {
     console.error("❌ Error while synchronizing tables :", err);

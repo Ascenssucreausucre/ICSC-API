@@ -436,6 +436,7 @@ router.post(
         conference_id,
         article_ids: JSON.stringify(articleIds),
         options_ids: JSON.stringify(optionIds),
+        extraPages: totalExtraPages,
         name,
         surname,
         country: JSON.stringify(country),
