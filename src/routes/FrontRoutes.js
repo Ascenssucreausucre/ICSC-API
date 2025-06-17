@@ -251,19 +251,25 @@ router.post(
     const { conference_id } = req.params;
     const {
       articles,
-      attendanceMode,
       country,
-      creditCardCountry,
       email,
-      ieeeMember,
       id,
-      paypal,
       options,
-      student,
       name,
       surname,
+      feeType,
+      feeProfile,
     } = req.body;
     try {
+      if (
+        articles.length > 1 &&
+        (feeType.toLowerCase() === "student" ||
+          feeType.toLowerCase() === "students")
+      ) {
+        return res
+          .status(401)
+          .json({ error: "You can't submit more than 1 paper as a student." });
+      }
       const conference = await Conference.findByPk(conference_id, {
         attributes: ["registrations_open"],
       });
@@ -348,7 +354,7 @@ router.post(
       }
 
       let registrationFees = await RegistrationFee.findOne({
-        where: { description: { [Op.like]: country } },
+        where: { description: { [Op.like]: country.name } },
         include: { model: FeeCategory, as: "feecategories" },
       });
 
@@ -362,32 +368,22 @@ router.post(
         });
       }
 
-      const category = registrationFees.feecategories.find((category) =>
-        student
-          ? category.type.toLowerCase() === "students"
-          : category.type.toLowerCase() === "academics"
+      const category = registrationFees.feecategories.find(
+        (category) => category.type.toLowerCase() === feeType.toLowerCase()
       );
 
       if (!category) {
         return res.status(400).json({
-          error: `No registration category found for ${
-            student ? "Students" : "Academics"
-          } in country ${country}.`,
+          error: `No registration category found for ${feeType} in country ${country.name}.`,
         });
       }
-      const virtualAttendance = attendanceMode.toLowerCase() === "online";
+      const baseFee = parseFloat(category[feeProfile]);
 
-      if (virtualAttendance && category.virtual_attendance == null) {
-        return res.status(400).json({
-          error: "Virtual attendance is not available for this category.",
-        });
+      if (!baseFee) {
+        return res
+          .status(400)
+          .json({ error: "You have to select valid options." });
       }
-
-      const baseFee = virtualAttendance
-        ? Number(category.virtual_attendance)
-        : ieeeMember
-        ? Number(category.ieee_member)
-        : Number(category.non_ieee_member);
 
       const additionnalFees = await AdditionalFee.findOne({
         where: { conference_id },
@@ -442,10 +438,8 @@ router.post(
         options_ids: JSON.stringify(optionIds),
         name,
         surname,
-        country,
-        student,
-        ieee_member: ieeeMember,
-        online: attendanceMode.toLowerCase() === "online",
+        country: JSON.stringify(country),
+        type: feeProfile,
         amount: Math.round(totalFees.total * 100),
       };
 

@@ -21,16 +21,8 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      ieee_member: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-      },
-      student: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-      },
-      online: {
-        type: DataTypes.BOOLEAN,
+      type: {
+        type: DataTypes.STRING,
         allowNull: false,
       },
       amount_paid: {

@@ -29,19 +29,13 @@ const stripeWebhook = async (req, res) => {
       name,
       surname,
       country,
-      student,
-      ieee_member,
-      online,
       amount,
     } = paymentIntent.metadata;
     console.log("📥 Data received by stripe:", paymentIntent.metadata);
 
     const articleIds = JSON.parse(article_ids);
     const optionIds = JSON.parse(options_ids);
-
-    const isStudent = student === "true";
-    const isIeee = ieee_member === "true";
-    const isOnline = online === "true";
+    const parsedCountry = JSON.parse(country);
     const parsedAmount = parseInt(amount, 10);
 
     const transaction = await sequelize.transaction();
@@ -53,11 +47,9 @@ const stripeWebhook = async (req, res) => {
           conference_id,
           name,
           surname,
-          country,
-          ieee_member: isIeee,
-          student: isStudent,
-          online: isOnline,
-          amount_paid: parsedAmount,
+          country: parsedCountry.name,
+          profile,
+          amount_paid: parsedAmount / 100,
         },
         { transaction }
       );

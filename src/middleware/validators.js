@@ -406,32 +406,27 @@ exports.verifyPaymentInformations = [
     }),
   body("options").optional().isArray().withMessage("Options must be an array."),
 
-  body("attendanceMode")
-    .isString()
-    .withMessage("Attendance mode is required.")
-    .isIn(["Online", "Face to face"])
-    .withMessage("Attendance mode must be 'online' or 'onsite'."),
+  body("country")
+    .notEmpty()
+    .withMessage("Country is required.")
+    .isObject()
+    .withMessage("Invalid country format, it has to be an object."),
 
-  body("country").isString().withMessage("Country is required."),
-
-  body("creditCardCountry")
+  body("country.name")
+    .notEmpty()
+    .withMessage("Country name is required.")
     .isString()
-    .withMessage("Credit card country is required."),
+    .withMessage("Country name must be a string."),
+
+  body("country.code")
+    .notEmpty()
+    .withMessage("Country code is required.")
+    .isString()
+    .withMessage("Country code must be a string."),
 
   body("email").isEmail().withMessage("Valid email is required."),
 
-  body("ieeeMember")
-    .isBoolean()
-    .withMessage("ieeeMember must be true or false."),
-
-  body("student").isBoolean().withMessage("student must be true or false."),
-
   body("id").optional().isInt().withMessage("id must be an integer."),
-
-  // body("paypal")
-  //   .optional()
-  //   .isObject()
-  //   .withMessage("If provided, paypal must be an object."),
 ];
 
 exports.verifyUser = [
