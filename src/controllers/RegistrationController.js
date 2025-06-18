@@ -81,22 +81,45 @@ exports.getById = async (req, res) => {
 };
 
 exports.getByConference = async (req, res) => {
-  const { conference_id } = req.params;
+  const { limit = 20, page = 1, search } = req.query;
   try {
+    const whereClause = {};
+
+    if (search && search.length > 0) {
+      whereClause[Op.or] = [
+        { conference_id },
+        { name: { [Op.like]: `%${search}%` } },
+        { surname: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    const parsedLimit = parseInt(limit);
+    const parsedPage = parseInt(page);
+    const offset = (parsedPage - 1) * parsedLimit;
+
     const registrations = await Registration.findAll({
-      where: { conference_id },
+      where: whereClause,
+      limit: parsedLimit,
+      offset,
       include: [
         {
           model: PaymentOption,
           as: "options",
+          attributes: ["price"],
+          through: { attributes: [] },
         },
         {
           model: Article,
           as: "articles",
+          attributes: ["id"],
         },
       ],
     });
-    res.status(200).json(registrations);
+
+    const total = await Registration.count({ where: whereClause });
+
+    res.status(200).json({ registrations, total });
   } catch (error) {
     console.error(error.message);
     res.status(error.statusCode || 500).json(error);
