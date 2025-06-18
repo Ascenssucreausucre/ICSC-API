@@ -119,6 +119,10 @@ module.exports = (sequelize) => {
       foreignKey: "conference_id",
       as: "contacts",
     });
+    Conference.hasMany(models.Registration, {
+      foreignKey: "conference_id",
+      as: "registration",
+    });
   };
 
   return Conference;

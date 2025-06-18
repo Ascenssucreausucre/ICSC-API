@@ -1,4 +1,16 @@
-const { Registration, PaymentOption, Article } = require("../models");
+const {
+  Registration,
+  PaymentOption,
+  Article,
+  Conference,
+} = require("../models");
+const {
+  getAdditionalFeeByConferenceData,
+} = require("./AdditionalFeeController");
+const {
+  getCurrentRegistrationFeesWithCategoriesData,
+} = require("./RegistrationFeeController");
+const { Op } = require("sequelize");
 
 exports.getAll = async (req, res) => {
   const { limit = 20, page = 1, search } = req.query;
@@ -82,12 +94,14 @@ exports.getById = async (req, res) => {
 
 exports.getByConference = async (req, res) => {
   const { limit = 20, page = 1, search } = req.query;
+  const { conference_id } = req.params;
   try {
-    const whereClause = {};
+    const whereClause = {
+      conference_id,
+    };
 
     if (search && search.length > 0) {
       whereClause[Op.or] = [
-        { conference_id },
         { name: { [Op.like]: `%${search}%` } },
         { surname: { [Op.like]: `%${search}%` } },
         { email: { [Op.like]: `%${search}%` } },
@@ -114,15 +128,29 @@ exports.getByConference = async (req, res) => {
           as: "articles",
           attributes: ["id"],
         },
+        {
+          model: Conference,
+          as: "conference",
+          attributes: ["acronym", "year"],
+        },
       ],
     });
 
+    const registrationFees = await getCurrentRegistrationFeesWithCategoriesData(
+      conference_id
+    );
+    const additionalFees = await getAdditionalFeeByConferenceData(
+      conference_id
+    );
+
     const total = await Registration.count({ where: whereClause });
 
-    res.status(200).json({ registrations, total });
+    res
+      .status(200)
+      .json({ registrations, total, registrationFees, additionalFees });
   } catch (error) {
     console.error(error.message);
-    res.status(error.statusCode || 500).json(error);
+    res.status(error.statusCode || 500).json({ error: error.message });
   }
 };
 exports.delete = async (req, res) => {

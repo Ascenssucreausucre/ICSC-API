@@ -23,7 +23,9 @@ module.exports = (sequelize) => {
       },
       type: {
         type: DataTypes.STRING,
-        allowNull: false,
+      },
+      profile: {
+        type: DataTypes.STRING,
       },
       extraPages: {
         type: DataTypes.INTEGER,

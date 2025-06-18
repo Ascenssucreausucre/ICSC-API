@@ -353,6 +353,13 @@ router.post(
         });
       }
 
+      const articlesIdsWithExtraPages = existingArticles.map((article) => {
+        const corrArt = articles.find(
+          (sentArticle) => sentArticle.id === article.id
+        );
+        return { id: article.id, extraPages: corrArt.extraPages };
+      });
+
       let registrationFees = await RegistrationFee.findOne({
         where: { description: { [Op.like]: country.name } },
         include: { model: FeeCategory, as: "feecategories" },
@@ -434,13 +441,14 @@ router.post(
       const stripeMetadata = {
         email,
         conference_id,
-        article_ids: JSON.stringify(articleIds),
+        articles: JSON.stringify(articlesIdsWithExtraPages),
         options_ids: JSON.stringify(optionIds),
         extraPages: totalExtraPages,
         name,
         surname,
         country: JSON.stringify(country),
-        type: feeProfile,
+        type: feeType,
+        profile: feeProfile,
         amount: Math.round(totalFees.total * 100),
       };
 

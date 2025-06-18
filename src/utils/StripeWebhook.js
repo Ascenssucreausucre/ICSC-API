@@ -24,18 +24,19 @@ const stripeWebhook = async (req, res) => {
     const {
       email,
       conference_id,
-      article_ids,
+      articles,
       options_ids,
       name,
       surname,
       country,
       amount,
       type,
+      profile,
       extraPages,
     } = paymentIntent.metadata;
     console.log("📥 Data received by stripe:", paymentIntent.metadata);
 
-    const articleIds = JSON.parse(article_ids);
+    const parsedArticles = JSON.parse(articles);
     const optionIds = JSON.parse(options_ids);
     const parsedCountry = JSON.parse(country);
     const parsedAmount = parseInt(amount, 10);
@@ -51,6 +52,7 @@ const stripeWebhook = async (req, res) => {
           surname,
           country: parsedCountry.name,
           type,
+          profile,
           amount_paid: parsedAmount / 100,
           extraPages: extraPages || 0,
         },
@@ -58,15 +60,23 @@ const stripeWebhook = async (req, res) => {
       );
 
       console.log("👉 Updating articles...");
-      await Article.update(
-        { registration_id: registration.id },
-        {
-          where: {
-            id: { [Op.in]: articleIds },
+      const articleUpdatePromises = (
+        Array.isArray(parsedArticles) ? parsedArticles : []
+      ).map((article) => {
+        if (!article?.id) return Promise.resolve(); // skip if no ID
+        return Article.update(
+          {
+            registration_id: registration.id,
+            extraPages: Number(article.extraPages) || 0,
           },
-          transaction,
-        }
-      );
+          {
+            where: { id: article.id },
+            transaction,
+          }
+        );
+      });
+
+      await Promise.all(articleUpdatePromises);
 
       console.log("👉 Adding options...");
       await registration.addOptions(optionIds, { transaction });

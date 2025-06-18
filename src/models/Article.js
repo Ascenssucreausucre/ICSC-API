@@ -39,6 +39,10 @@ module.exports = (sequelize) => {
         onDelete: "SET NULL",
         onUpdate: "CASCADE",
       },
+      extra_pages: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
       conference_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
