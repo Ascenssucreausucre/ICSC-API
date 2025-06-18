@@ -59,7 +59,7 @@ exports.getById = async (req, res) => {
           through: { attributes: [] },
         },
         {
-          model: Articles,
+          model: Article,
           as: "articles",
           attributes: {
             exclude: ["conference_id", "registration_id"],
@@ -91,7 +91,7 @@ exports.getByConference = async (req, res) => {
           as: "options",
         },
         {
-          model: Articles,
+          model: Article,
           as: "articles",
         },
       ],
