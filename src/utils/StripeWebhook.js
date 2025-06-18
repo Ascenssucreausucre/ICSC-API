@@ -52,7 +52,7 @@ const stripeWebhook = async (req, res) => {
           country: parsedCountry.name,
           type,
           amount_paid: parsedAmount / 100,
-          extraPages,
+          extraPages: extraPages || 0,
         },
         { transaction }
       );

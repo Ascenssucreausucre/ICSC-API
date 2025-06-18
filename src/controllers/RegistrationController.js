@@ -1,8 +1,26 @@
-const { Registration, PaymentOption, Articles } = require("../models");
+const { Registration, PaymentOption, Article } = require("../models");
 
 exports.getAll = async (req, res) => {
+  const { limit = 20, page = 1, search } = req.query;
   try {
+    const whereClause = {};
+
+    if (search && search.length > 0) {
+      whereClause[Op.or] = [
+        { name: { [Op.like]: `%${search}%` } },
+        { surname: { [Op.like]: `%${search}%` } },
+        { email: { [Op.like]: `%${search}%` } },
+      ];
+    }
+
+    const parsedLimit = parseInt(limit);
+    const parsedPage = parseInt(page);
+    const offset = (parsedPage - 1) * parsedLimit;
+
     const registrations = await Registration.findAll({
+      where: whereClause,
+      limit: parsedLimit,
+      offset,
       include: [
         {
           model: PaymentOption,
@@ -11,14 +29,16 @@ exports.getAll = async (req, res) => {
           through: { attributes: [] },
         },
         {
-          model: Articles,
+          model: Article,
           as: "articles",
           attributes: ["id"],
         },
       ],
     });
 
-    res.status(200).json(registrations);
+    const total = await Registration.count({ where: whereClause });
+
+    res.status(200).json({ registrations, total });
   } catch (error) {
     console.error("Error fetching registrations:", error);
     res.status(500).json({ error: "Internal server error: " + error.message });
