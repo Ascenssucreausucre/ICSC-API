@@ -64,11 +64,10 @@ const stripeWebhook = async (req, res) => {
         Array.isArray(parsedArticles) ? parsedArticles : []
       ).map((article) => {
         if (!article?.id) return Promise.resolve(); // skip if no ID
-        console.log(article);
         return Article.update(
           {
             registration_id: registration.id,
-            extraPages: Number(article.extraPages) || 0,
+            extra_pages: Number(article.extraPages) || 0,
           },
           {
             where: { id: article.id },
