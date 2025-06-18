@@ -3,6 +3,7 @@ const {
   PaymentOption,
   Article,
   Conference,
+  Author,
 } = require("../models");
 const {
   getAdditionalFeeByConferenceData,
@@ -76,6 +77,13 @@ exports.getById = async (req, res) => {
           attributes: {
             exclude: ["conference_id", "registration_id"],
           },
+          include: [
+            {
+              model: Author,
+              as: "authors",
+              attributes: ["name", "surname", "id"],
+            },
+          ],
         },
       ],
     });

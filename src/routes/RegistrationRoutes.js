@@ -12,7 +12,7 @@ router.get(
   RegistrationController.getByConference
 );
 router.get(
-  "/:conference_id",
+  "/conference/:conference_id",
   authenticateAdmin,
   RegistrationController.getByConference
 );
