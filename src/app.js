@@ -22,13 +22,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("public/uploads"));
 
-const corsOrigin = [
-  "https://icsc.up.railway.app",
-  "https://icsc-conference.netlify.app",
-];
+let corsOrigin = [];
 
-if (process.env.NODE_ENV === "development") {
-  corsOrigin.push("http://localhost:5173");
+if (process.env.CORS_ORIGIN) {
+  corsOrigin = process.env.CORS_ORIGIN.split(",");
 }
 
 // CORS

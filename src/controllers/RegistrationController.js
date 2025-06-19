@@ -66,9 +66,6 @@ exports.getById = async (req, res) => {
         {
           model: PaymentOption,
           as: "options",
-          attributes: {
-            exclude: ["conference_id"],
-          },
           through: { attributes: [] },
         },
         {
@@ -87,13 +84,31 @@ exports.getById = async (req, res) => {
         },
       ],
     });
+
     if (!registration) {
       return res
         .status(404)
         .json({ error: `No registration found with id ${id}` });
     }
+    const additionalFees = await getAdditionalFeeByConferenceData(
+      registration.conference_id
+    );
+    const registrationFees = await getCurrentRegistrationFeesWithCategoriesData(
+      registration.conference_id
+    );
 
-    res.status(200).json(registration);
+    const registrationFee =
+      registrationFees.find(
+        (registrationFee) =>
+          registrationFee.description.toLowerCase() ===
+          registration.country.toLowerCase()
+      ) ||
+      registrationFees.find(
+        (registrationFee) =>
+          registrationFee.description.toLowerCase() === "other countries"
+      );
+
+    res.status(200).json({ registration, additionalFees, registrationFee });
   } catch (error) {
     console.error("Error fetching registrations:", error);
     res.status(500).json({ error: "Internal server error: " + error.message });
@@ -134,7 +149,7 @@ exports.getByConference = async (req, res) => {
         {
           model: Article,
           as: "articles",
-          attributes: ["id"],
+          attributes: ["id", "extra_pages"],
         },
         {
           model: Conference,
