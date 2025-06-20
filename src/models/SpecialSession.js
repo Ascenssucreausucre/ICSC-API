@@ -27,7 +27,7 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "conferences", // Correspond au nom de la table en BDD
+          model: "conferences",
           key: "id",
         },
       },

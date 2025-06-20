@@ -4,16 +4,12 @@ const fs = require("fs");
 const fsp = require("fs").promises;
 const { Op } = require("sequelize");
 
-// ====================== MÉTHODES "DATA" ====================== //
-
-// Récupérer tous les sponsors avec leur conférence
 exports.getAllSponsorsData = async () => {
   return await Sponsor.findAll({
     include: [{ model: Conference, as: "conference", attributes: ["year"] }],
   });
 };
 
-// Récupérer les sponsors par conférence
 exports.getSponsorsByConferenceData = async (conference_id) => {
   return await Sponsor.findAll({
     where: { conference_id },
@@ -21,20 +17,16 @@ exports.getSponsorsByConferenceData = async (conference_id) => {
   });
 };
 
-// ====================== MÉTHODES "HTTP" ====================== //
-
-// Récupérer tous les sponsors
 exports.getAllSponsors = async (req, res) => {
   try {
     const sponsors = await exports.getAllSponsorsData();
-    res.status(200).json(sponsors); // Retourne toujours 200, même si la liste est vide
+    res.status(200).json(sponsors);
   } catch (error) {
     console.error("Error fetching all sponsors:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
-// Récupérer les sponsors d'une conférence spécifique
 exports.getSponsorsByConference = async (req, res) => {
   try {
     const { conference_id } = req.params;
@@ -46,7 +38,6 @@ exports.getSponsorsByConference = async (req, res) => {
   }
 };
 
-// Créer un sponsor
 exports.createSponsor = async (req, res) => {
   const transaction = await Sponsor.sequelize.transaction();
   const { name, type, conference_id } = req.body;
@@ -87,7 +78,6 @@ exports.createSponsor = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
 
-    // Nettoyage de l'image uploadée si erreur
     if (req.file) {
       try {
         await fsp.unlink(
@@ -103,7 +93,6 @@ exports.createSponsor = async (req, res) => {
   }
 };
 
-// Mettre à jour un sponsor
 exports.updateSponsor = async (req, res) => {
   const transaction = await Sponsor.sequelize.transaction();
   const folder = req.uploadFolder || "sponsor-images";
@@ -143,7 +132,6 @@ exports.updateSponsor = async (req, res) => {
 
     await transaction.commit();
 
-    // Supprimer l'ancienne image si un nouveau fichier a été fourni
     if (oldImagePath && fs.existsSync(oldImagePath)) {
       fs.unlinkSync(oldImagePath);
     }
@@ -155,7 +143,6 @@ exports.updateSponsor = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
 
-    // Supprimer le nouveau fichier en cas d’échec
     if (req.file) {
       const newFilePath = path.join(
         "public/uploads",
@@ -172,7 +159,6 @@ exports.updateSponsor = async (req, res) => {
   }
 };
 
-// Supprimer un sponsor
 exports.deleteSponsor = async (req, res) => {
   try {
     const { id } = req.params;
@@ -184,7 +170,6 @@ exports.deleteSponsor = async (req, res) => {
         .json({ error: `No sponsor found with ID: ${id}.` });
     }
 
-    // Supprime l'image associée si elle existe
     const imagePath = path.join(
       __dirname,
       "../../public/uploads",
@@ -194,7 +179,6 @@ exports.deleteSponsor = async (req, res) => {
       fs.unlinkSync(imagePath);
     }
 
-    // Supprime le sponsor en base de données
     await sponsor.destroy();
 
     res.status(200).json({ message: "Sponsor successfully deleted." });

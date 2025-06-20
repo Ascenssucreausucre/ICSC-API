@@ -7,7 +7,7 @@ module.exports = (sequelize) => {
       article_id: {
         type: DataTypes.INTEGER,
         references: {
-          model: "articles", // Nom de la table `Articles`
+          model: "articles",
           key: "id",
         },
         primaryKey: true,
@@ -15,20 +15,19 @@ module.exports = (sequelize) => {
       author_id: {
         type: DataTypes.INTEGER,
         references: {
-          model: "authors", // Nom de la table `Authors`
+          model: "authors",
           key: "id",
         },
         primaryKey: true,
       },
-      // Ajoute ici d'autres champs si nécessaire
       createdAt: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
       },
     },
     {
-      tableName: "articleauthors", // Le nom de la table de jonction
-      timestamps: false, // Si tu ne veux pas que Sequelize ajoute des timestamps comme `createdAt` et `updatedAt`
+      tableName: "articleauthors",
+      timestamps: false,
     }
   );
 

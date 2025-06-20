@@ -4,7 +4,6 @@ const path = require("path");
 const fs = require("fs");
 const fsp = require("fs").promises;
 
-// Méthode Data pour récupérer toutes les conférences
 exports.getAllConferencesData = async () => {
   try {
     const conferences = await Conference.findAll();
@@ -15,7 +14,6 @@ exports.getAllConferencesData = async () => {
   }
 };
 
-// Endpoint HTTP pour récupérer toutes les conférences
 exports.getAllConferences = async (req, res) => {
   try {
     const conferences = await exports.getAllConferencesData();
@@ -26,12 +24,11 @@ exports.getAllConferences = async (req, res) => {
   }
 };
 
-// Méthode Data pour récupérer une conférence par ID
 exports.getConferenceByIdData = async (id) => {
   try {
     const targetedConference = await Conference.findByPk(id);
     if (!targetedConference) {
-      const error = new Error("Information non trouvée");
+      const error = new Error("No conference found");
       error.statusCode = 404;
       throw error;
     }
@@ -42,7 +39,6 @@ exports.getConferenceByIdData = async (id) => {
   }
 };
 
-// Endpoint HTTP pour récupérer une conférence par ID
 exports.getConferenceById = async (req, res) => {
   try {
     const targetedConference = await exports.getConferenceByIdData(
@@ -55,7 +51,6 @@ exports.getConferenceById = async (req, res) => {
   }
 };
 
-// Méthode Data pour récupérer la conférence actuelle (déjà présente dans votre code)
 exports.getCurrentConferenceData = async () => {
   try {
     const currentConference = await Conference.findOne({
@@ -73,7 +68,6 @@ exports.getCurrentConferenceData = async () => {
   }
 };
 
-// Endpoint HTTP pour récupérer la conférence actuelle (déjà présent dans votre code)
 exports.getCurrentConference = async (req, res) => {
   try {
     const currentConference = await exports.getCurrentConferenceData();
@@ -121,7 +115,7 @@ exports.createConference = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Conférence créée avec succès",
+      message: "Connference has been successfully created!",
       newItem: targetedConference,
     });
   } catch (error) {
@@ -131,7 +125,7 @@ exports.createConference = async (req, res) => {
         await fsp.unlink(path.join(__dirname, "../../public/uploads", banner));
       } catch (unlinkError) {
         console.error(
-          "Erreur de suppression du banner après échec :",
+          "Error while deleting the file after process failed:",
           unlinkError
         );
       }
@@ -175,7 +169,6 @@ exports.updateConference = async (req, res) => {
     let oldBannerPath;
 
     if (req.file) {
-      // Suppression de l'ancien fichier
       if (newBanner) {
         oldBannerPath = path.join(__dirname, "../../public/uploads", newBanner);
       }
@@ -201,7 +194,6 @@ exports.updateConference = async (req, res) => {
 
     await transaction.commit();
 
-    // Supprimer l'ancien fichier uniquement après le commit
     if (oldBannerPath && fs.existsSync(oldBannerPath)) {
       fs.unlinkSync(oldBannerPath);
     }
@@ -213,7 +205,6 @@ exports.updateConference = async (req, res) => {
     await transaction.rollback();
     console.error(error.message);
 
-    // Supprimer le nouveau fichier s’il a été uploadé
     if (req.file) {
       const folder = req.uploadFolder || "conference-banners";
       const uploadedFilePath = path.join(
@@ -266,7 +257,6 @@ exports.deleteConference = async (req, res) => {
       });
     }
 
-    // Supprimer le fichier banner s'il existe
     const bannerPath = path.join(
       __dirname,
       "../../public/uploads",

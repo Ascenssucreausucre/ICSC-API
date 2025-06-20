@@ -42,7 +42,6 @@ function createUploader({
     fileFilter,
   });
 
-  // Ce wrapper capture les erreurs et les renvoie proprement en JSON
   return {
     single: (fieldName) => (req, res, next) => {
       console.log(
@@ -50,7 +49,6 @@ function createUploader({
       );
       console.log(`Content-Type of request: ${req.headers["content-type"]}`);
 
-      // Vérifiez si le champ existe dans le formulaire
       upload.single(fieldName)(req, res, function (err) {
         console.log(
           `[DEBUG] Multer processing completed for field: ${fieldName}`
@@ -67,7 +65,6 @@ function createUploader({
           return res.status(500).json({ error: "Erreur de téléchargement." });
         }
 
-        // Vérifiez si un fichier a été uploadé
         if (req.file) {
           console.log(
             `[SUCCESS] File uploaded: ${req.file.originalname} -> ${req.file.filename}`

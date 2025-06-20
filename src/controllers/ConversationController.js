@@ -188,7 +188,7 @@ exports.getConversation = async (req, res) => {
         {
           model: User,
           as: "user",
-          attributes: ["id", "name", "surname", "email"], // si tu veux lier les users
+          attributes: ["id", "name", "surname", "email"],
         },
       ],
       order: [[{ model: Message, as: "messages" }, "createdAt", "DESC"]],
@@ -221,54 +221,22 @@ exports.getConversation = async (req, res) => {
   }
 };
 
-// exports.getAllConversationsWithLastMessage = async (req, res) => {
-//   try {
-//     const conversations = await Conversation.findAll({
-//       // where: {
-//       //   archived: false,
-//       // },
-//       include: [
-//         {
-//           model: Message,
-//           as: "messages",
-//           limit: 1,
-//           order: [["createdAt", "DESC"]],
-//         },
-//         {
-//           model: User,
-//           as: "user",
-//           attributes: ["id", "name", "surname", "email"],
-//         },
-//       ],
-//       order: [["lastMessageAt", "DESC"]],
-//     });
-
-//     return res.status(200).json(conversations);
-//   } catch (error) {
-//     console.error("Error retreiving conversations :", error);
-//     return res.status(500).json({ message: `Server error: ${error.message}` });
-//   }
-// };
-
 exports.getAdminConversations = async (req, res) => {
   const { showArchived, onlyUnread, limit = 20, page = 1 } = req.query;
 
   try {
     const whereClause = {};
 
-    // Filtrer par conversations archivées ou non
     if (showArchived === "false") {
       whereClause.archived = false;
     } else if (showArchived === "true") {
       whereClause.archived = true;
     }
 
-    // Pagination
     const parsedLimit = parseInt(limit);
     const parsedPage = parseInt(page);
     const offset = (parsedPage - 1) * parsedLimit;
 
-    // Inclure les messages avec le dernier en haut
     const includeOptions = [
       {
         model: Message,
@@ -284,7 +252,6 @@ exports.getAdminConversations = async (req, res) => {
       },
     ];
 
-    // Ajouter un filtre "onlyUnread"
     if (onlyUnread === "true") {
       whereClause.unreadByAdmin = true;
     }

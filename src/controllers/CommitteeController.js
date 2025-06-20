@@ -56,7 +56,6 @@ exports.createCommittee = async (req, res) => {
   }
 };
 
-// Méthode Data pour récupérer tous les comités
 exports.getAllCommitteesData = async () => {
   const committees = await Committee.findAll({
     include: [
@@ -85,7 +84,6 @@ exports.getAllCommitteesData = async () => {
   return committees;
 };
 
-// Endpoint HTTP pour récupérer tous les comités
 exports.getAllCommittees = async (req, res) => {
   try {
     const committees = await exports.getAllCommitteesData();
@@ -138,7 +136,6 @@ exports.updateCommittee = async (req, res) => {
   }
 };
 
-// Méthode Data pour récupérer un comité par ID
 exports.getCommitteeByIdData = async (id) => {
   const committee = await Committee.findOne({
     where: { id },
@@ -168,7 +165,6 @@ exports.getCommitteeByIdData = async (id) => {
   return committee;
 };
 
-// Endpoint HTTP pour récupérer un comité par ID
 exports.getCommitteeById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -184,19 +180,16 @@ exports.addMemberToCommittee = async (req, res) => {
   try {
     const { committee_id, id, name, surname, affiliation, title } = req.body;
 
-    // Vérifier ou créer le membre
     let member = await CommitteeMember.findByPk(id);
     if (!member) {
       member = await CommitteeMember.create({ name, surname, affiliation });
     }
 
-    // Vérifier l'existence du comité
     const committee = await Committee.findByPk(committee_id);
     if (!committee) {
       return res.status(404).json({ error: "Committee not found." });
     }
 
-    // Ajouter le membre au comité avec le rôle
     await committee.addMember(member, { through: { title } });
 
     res
@@ -210,15 +203,12 @@ exports.addMemberToCommittee = async (req, res) => {
 
 exports.addMembersToCommittee = async (req, res) => {
   try {
-    const { committee_id, members } = req.body; // `members` est un tableau [{ member_id, name, surname, affiliation, title }]
+    const { committee_id, members } = req.body;
 
-    // Vérifier l'existence du comité
     const committee = await Committee.findByPk(committee_id);
     if (!committee) {
       return res.status(404).json({ error: "Committee not found." });
     }
-
-    // Traiter chaque membre individuellement
     const membersToAdd = await Promise.all(
       members.map(async ({ id, name, surname, affiliation, title }) => {
         let member = await CommitteeMember.findByPk(id);
@@ -229,7 +219,6 @@ exports.addMembersToCommittee = async (req, res) => {
       })
     );
 
-    // Ajouter tous les membres avec leurs rôles
     await Promise.all(
       membersToAdd.map(({ member, title }) =>
         committee.addMember(member, { through: { title } })
@@ -272,15 +261,13 @@ exports.removeMemberFromCommittee = async (req, res) => {
 
 exports.removeMembersFromCommittee = async (req, res) => {
   try {
-    const { committee_id, member_ids } = req.body; // `member_ids` est un tableau d'IDs
+    const { committee_id, member_ids } = req.body;
 
-    // Vérifier si le comité existe
     const committee = await Committee.findByPk(committee_id);
     if (!committee) {
       return res.status(404).json({ error: "Committee not found." });
     }
 
-    // Vérifier si tous les membres existent
     const existingMembers = await CommitteeMember.findAll({
       where: { id: member_ids },
     });
@@ -289,7 +276,6 @@ exports.removeMembersFromCommittee = async (req, res) => {
       return res.status(404).json({ error: "One or more members not found." });
     }
 
-    // Supprimer tous les membres en une seule opération
     await committee.removeMembers(existingMembers);
 
     res.status(200).json({

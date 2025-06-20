@@ -1,7 +1,5 @@
 const { Topic, Content } = require("../models");
 
-// ========================== Récupération des données ========================== //
-
 exports.getTopicData = async (conference_id) => {
   return await Topic.findAll({
     where: { conference_id },
@@ -14,8 +12,6 @@ exports.getTopicData = async (conference_id) => {
     ],
   });
 };
-
-// ========================== Routes HTTP ========================== //
 
 exports.getAllTopicsWithContent = async (req, res) => {
   try {
@@ -30,8 +26,10 @@ exports.getAllTopicsWithContent = async (req, res) => {
 
     res.status(200).json(formattedTopics);
   } catch (error) {
-    console.error("Erreur lors de la récupération des topics :", error);
-    res.status(500).json({ error: "Erreur serveur" });
+    console.error("Error while retreiving registrations topics:", error);
+    res
+      .status(500)
+      .json({ error: "Error while retreiving registrations topics:", error });
   }
 };
 
@@ -45,7 +43,6 @@ exports.createTopicWithContent = async (req, res) => {
   }
 
   try {
-    // Transaction pour garantir la cohérence des données
     const result = await Topic.sequelize.transaction(async (t) => {
       const topic = await Topic.create(
         { title, conference_id },
@@ -104,16 +101,12 @@ exports.updateTopicWithContent = async (req, res) => {
       return res.status(404).json({ error: "Topic not found" });
     }
 
-    // Transaction pour garantir que la mise à jour soit cohérente
     await Topic.sequelize.transaction(async (t) => {
-      // Mise à jour du titre
       topic.title = title || topic.title;
       await topic.save({ transaction: t });
 
-      // Mise à jour du contenu
       const existingContents = await topic.getContents({ transaction: t });
 
-      // Supprimer les contenus qui ne sont plus dans le tableau
       const contentToDelete = existingContents.filter(
         (existingContent) => !content.includes(existingContent.text)
       );
@@ -122,7 +115,6 @@ exports.updateTopicWithContent = async (req, res) => {
         await contentToRemove.destroy({ transaction: t });
       }
 
-      // Ajouter les nouveaux contenus
       for (const text of content) {
         const existingContent = existingContents.find((ec) => ec.text === text);
         if (!existingContent) {

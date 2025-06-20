@@ -206,7 +206,6 @@ exports.delete = async (req, res) => {
         .json({ error: "No plenary session found with this id" });
     }
 
-    // Supprimer l'image si elle existe
     if (session.image) {
       const imagePath = path.join("public/uploads", session.image);
       try {

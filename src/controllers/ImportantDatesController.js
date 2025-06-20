@@ -1,30 +1,18 @@
-const { where } = require("sequelize");
 const { ImportantDates } = require("../models");
 
-// ====================== MÉTHODES "DATA" ====================== //
-
-// Récupère toutes les dates importantes
 exports.getAllImportantDatesData = async () => {
   return await ImportantDates.findAll();
 };
 
-// Récupère une date importante par ID
 exports.getImportantDatesByIdData = async (id) => {
   return await ImportantDates.findByPk(id);
 };
 
-// Récupère les dates importantes d'une conférence spécifique
 exports.getCurrentImportantDatesData = async (conference_id) => {
   try {
     const currentDates = await ImportantDates.findOne({
       where: { conference_id },
     });
-
-    // if (!currentDates) {
-    //   const error = new Error("No dates found");
-    //   error.statusCode = 404;
-    //   throw error;
-    // }
 
     return currentDates;
   } catch (error) {
@@ -33,9 +21,6 @@ exports.getCurrentImportantDatesData = async (conference_id) => {
   }
 };
 
-// ====================== MÉTHODES "HTTP" ====================== //
-
-// Récupère toutes les dates importantes
 exports.getAllImportantDates = async (req, res) => {
   try {
     const dates = await exports.getAllImportantDatesData();
@@ -45,14 +30,13 @@ exports.getAllImportantDates = async (req, res) => {
   }
 };
 
-// Récupère une date importante par ID
 exports.getImportantDatesById = async (req, res) => {
   try {
     const { id } = req.params;
     const dates = await exports.getImportantDatesByIdData(id);
 
     if (!dates) {
-      return res.status(404).json({ error: "Dates non trouvées" });
+      return res.status(404).json({ error: "No dates found" });
     }
 
     res.status(200).json(dates);
@@ -61,7 +45,6 @@ exports.getImportantDatesById = async (req, res) => {
   }
 };
 
-// Récupère les dates importantes actuelles d'une conférence
 exports.getCurrentImportantDates = async (req, res) => {
   try {
     const { conference_id } = req.params;
@@ -74,7 +57,6 @@ exports.getCurrentImportantDates = async (req, res) => {
   }
 };
 
-// Crée une date importante
 exports.createImportantDate = async (req, res) => {
   try {
     const { conference_id } = req.body;
@@ -97,7 +79,6 @@ exports.createImportantDate = async (req, res) => {
   }
 };
 
-// Met à jour les dates importantes d'une conférence
 exports.updateImportantDates = async (req, res) => {
   try {
     const { conference_id } = req.params;

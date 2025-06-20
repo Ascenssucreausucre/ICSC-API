@@ -9,7 +9,7 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "conferences", // Correspond au nom de la table en BDD
+          model: "conferences",
           key: "id",
         },
       },
@@ -20,19 +20,17 @@ module.exports = (sequelize) => {
       },
     },
     {
-      tableName: "registrationfees", // Assurez-vous que le nom de la table correspond à la BDD (en minuscule ici)
+      tableName: "registrationfees",
       timestamps: false,
     }
   );
 
   RegistrationFee.associate = (models) => {
-    // Association avec Conference
     RegistrationFee.belongsTo(models.Conference, {
       foreignKey: "conference_id",
       as: "conference",
     });
 
-    // Association avec FeeCategory
     RegistrationFee.hasMany(models.FeeCategory, {
       foreignKey: "registration_fee_id",
       as: "feecategories",

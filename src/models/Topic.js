@@ -18,7 +18,7 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "conferences", // Correspond au nom de la table en BDD
+          model: "conferences",
           key: "id",
         },
       },
@@ -29,7 +29,6 @@ module.exports = (sequelize) => {
     }
   );
 
-  // Définition des relations
   Topic.associate = (models) => {
     Topic.belongsTo(models.Conference, {
       foreignKey: "conference_id",

@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET || "ton-secret-de-jwt";
 
-// Middleware générique pour tout admin
 const authenticateAdmin = (req, res, next) => {
   const token = req.cookies?.token;
 
@@ -34,7 +33,6 @@ const authenticateAdmin = (req, res, next) => {
   }
 };
 
-// Middleware pour superadmin uniquement
 const authenticateSuperAdmin = (req, res, next) => {
   authenticateAdmin(req, res, () => {
     if (req.admin?.role !== "superadmin") {

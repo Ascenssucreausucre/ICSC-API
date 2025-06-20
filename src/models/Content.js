@@ -18,7 +18,7 @@ module.exports = (sequelize) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "topics", // Le nom de la table à laquelle la clé fait référence
+          model: "topics",
           key: "id",
         },
       },

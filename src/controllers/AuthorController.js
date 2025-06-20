@@ -196,7 +196,7 @@ exports.searchAuthors = async (req, res) => {
       results: paginatedResults,
     });
   } catch (error) {
-    console.error("Erreur de recherche:", error);
+    console.error("Search error:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -208,7 +208,7 @@ exports.getDistinctCountries = async (req, res) => {
         [Sequelize.fn("DISTINCT", Sequelize.col("country")), "country"],
       ],
       where: {
-        country: { [Op.ne]: null }, // exclut les NULL
+        country: { [Op.ne]: null },
       },
       order: [["country", "ASC"]],
     });
@@ -234,7 +234,7 @@ exports.getDistinctAffiliations = async (req, res) => {
 
     res.status(200).json(affiliations.map((a) => a.affiliation));
   } catch (error) {
-    console.error("Erreur récupération des affiliations:", error);
+    console.error("Error while retreiving affiliations:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -256,7 +256,7 @@ exports.getFilters = async (req, res) => {
         [Sequelize.fn("DISTINCT", Sequelize.col("country")), "country"],
       ],
       where: {
-        country: { [Op.ne]: null }, // exclut les NULL
+        country: { [Op.ne]: null },
       },
       order: [["country", "ASC"]],
     });
@@ -266,7 +266,7 @@ exports.getFilters = async (req, res) => {
       countries: countries.map((a) => a.country),
     });
   } catch (error) {
-    console.error("Erreur récupération des affiliations:", error);
+    console.error("Error while retreiving affiliations:", error);
     res.status(500).json({ error: error.message });
   }
 };

@@ -1,9 +1,6 @@
 const { RegistrationFee, FeeCategory } = require("../models");
 const { Op } = require("sequelize");
 
-// ====================== MÉTHODES "DATA" ====================== //
-
-// Récupérer tous les frais d'inscription avec leurs catégories
 exports.getAllRegistrationFeesWithCategoriesData = async () => {
   return await RegistrationFee.findAll({
     include: [
@@ -21,7 +18,6 @@ exports.getAllRegistrationFeesWithCategoriesData = async () => {
   });
 };
 
-// Récupérer les frais d'inscription d'une conférence spécifique
 exports.getCurrentRegistrationFeesWithCategoriesData = async (
   conference_id
 ) => {
@@ -42,24 +38,19 @@ exports.getCurrentRegistrationFeesWithCategoriesData = async (
   });
 };
 
-// ====================== MÉTHODES "HTTP" ====================== //
-
-// Récupérer tous les frais d'inscription
 exports.getAllRegistrationFeesWithCategories = async (req, res) => {
   try {
     const registrationFees =
       await exports.getAllRegistrationFeesWithCategoriesData();
     res.status(200).json(registrationFees);
   } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des frais d'inscription :",
-      error
-    );
-    res.status(500).json({ error: "Erreur serveur" });
+    console.error("Error while retreiving registrations fees:", error);
+    res
+      .status(500)
+      .json({ error: "Error while retreiving registrations fees:", error });
   }
 };
 
-// Récupérer les frais d'inscription d'une conférence spécifique
 exports.getCurrentRegistrationFeesWithCategories = async (req, res) => {
   try {
     const { conference_id } = req.params;
@@ -67,15 +58,13 @@ exports.getCurrentRegistrationFeesWithCategories = async (req, res) => {
       await exports.getCurrentRegistrationFeesWithCategoriesData(conference_id);
     res.status(200).json(registrationFees);
   } catch (error) {
-    console.error(
-      "Erreur lors de la récupération des frais d'inscription :",
-      error
-    );
-    res.status(500).json({ error: "Erreur serveur" });
+    console.error("Error while retreiving registrations fees:", error);
+    res
+      .status(500)
+      .json({ error: "Error while retreiving registrations fees:", error });
   }
 };
 
-// Créer un frais d'inscription avec ses catégories
 exports.createRegistrationFeeWithCategories = async (req, res) => {
   const { description, conference_id, feecategories } = req.body;
 
@@ -100,22 +89,20 @@ exports.createRegistrationFeeWithCategories = async (req, res) => {
     }
 
     res.status(201).json({
-      message: "Frais d'inscription créé avec succès!",
+      message: "Registration fee has been successfully created.",
       newItem: {
         ...registrationFee.dataValues,
         feecategories: feecategories || [],
       },
     });
   } catch (error) {
-    console.error(
-      "Erreur lors de la création des frais d'inscription :",
-      error
-    );
-    res.status(500).json({ error: error.message });
+    console.error("Error while retreiving registrations fee:", error);
+    res
+      .status(500)
+      .json({ error: "Error while creating registrations fee:", error });
   }
 };
 
-// Mettre à jour un frais d'inscription avec ses catégories
 exports.updateRegistrationFeeWithCategories = async (req, res) => {
   const { id } = req.params;
   const { description, feecategories } = req.body;
@@ -126,20 +113,17 @@ exports.updateRegistrationFeeWithCategories = async (req, res) => {
       return res.status(404).json({ error: "No registration fee found" });
     }
 
-    // Mise à jour de la description
     await registrationFee.update({ description: description.toLowerCase() });
 
     if (Array.isArray(feecategories)) {
-      // Récupérer toutes les catégories existantes
       const existingCategories = await FeeCategory.findAll({
         where: { registration_fee_id: id },
       });
 
       const incomingIds = feecategories
-        .filter((cat) => cat.id) // on prend les catégories avec un id
+        .filter((cat) => cat.id)
         .map((cat) => cat.id);
 
-      // Supprimer les catégories qui ne sont plus présentes dans la nouvelle liste
       const toDelete = existingCategories.filter(
         (cat) => !incomingIds.includes(cat.id)
       );
@@ -151,10 +135,8 @@ exports.updateRegistrationFeeWithCategories = async (req, res) => {
         });
       }
 
-      // Traiter les nouvelles données : update ou create
       for (const category of feecategories) {
         if (category.id) {
-          // Update si l'id est présent
           await FeeCategory.update(
             {
               type: category.type,
@@ -165,7 +147,6 @@ exports.updateRegistrationFeeWithCategories = async (req, res) => {
             { where: { id: category.id, registration_fee_id: id } }
           );
         } else {
-          // Create si pas d'id
           await FeeCategory.create({
             type: category.type,
             ieee_member: category.ieee_member,
@@ -187,23 +168,22 @@ exports.updateRegistrationFeeWithCategories = async (req, res) => {
   }
 };
 
-// Supprimer un frais d'inscription
 exports.deleteRegistrationFee = async (req, res) => {
   try {
     const { id } = req.params;
 
     const deleted = await RegistrationFee.destroy({ where: { id } });
     if (!deleted) {
-      return res
-        .status(404)
-        .json({ message: "Frais d'inscription non trouvé" });
+      return res.status(404).json({ message: "Registration fees not found" });
     }
 
     return res
       .status(200)
-      .json({ message: "Frais d'inscription supprimé avec succès" });
+      .json({ message: "Registration fee has been successfullt deleted." });
   } catch (error) {
-    console.error("Erreur lors de la suppression :", error);
-    res.status(500).json({ error: "Erreur serveur" });
+    console.error("Error while retreiving registrations fees:", error);
+    res
+      .status(500)
+      .json({ error: "Error while retreiving registrations fees:", error });
   }
 };

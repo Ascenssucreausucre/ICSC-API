@@ -4,15 +4,15 @@ const sequelize = require("../config/sequelize");
 
 const models = {};
 
-// Lire tous les fichiers du répertoire models
+// Read each model file
 fs.readdirSync(__dirname)
   .filter((file) => file !== "index.js")
   .forEach((file) => {
-    const model = require(path.join(__dirname, file))(sequelize); // Charger et initialiser chaque modèle
+    const model = require(path.join(__dirname, file))(sequelize); // Load and initialize each model
     models[model.name] = model;
   });
 
-// Définition des relations entre les modèles
+// Define associations
 Object.keys(models).forEach((modelName) => {
   if (models[modelName].associate) {
     models[modelName].associate(models);
@@ -21,7 +21,7 @@ Object.keys(models).forEach((modelName) => {
 
 async function syncModels() {
   try {
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     console.log("✅ Database has been usccessfully synchronized!");
   } catch (err) {
     console.error("❌ Error while synchronizing tables :", err);

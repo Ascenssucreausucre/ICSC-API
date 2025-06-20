@@ -65,7 +65,6 @@ module.exports = (sequelize) => {
     }
   );
 
-  // 💡 Déclaration des relations ici, de façon standardisée
   Conference.associate = (models) => {
     Conference.hasMany(models.Topic, {
       foreignKey: "conference_id",

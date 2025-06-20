@@ -97,6 +97,6 @@ async function ImportExceldata(filePath, conferenceId) {
     }
   }
 
-  console.log("Importation terminée");
+  console.log("Import done.");
 }
 module.exports = ImportExceldata;

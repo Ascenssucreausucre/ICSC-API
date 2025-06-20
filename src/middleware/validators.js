@@ -2,7 +2,7 @@
 const { body, validationResult } = require("express-validator");
 const { isValidPhoneNumber } = require("libphonenumber-js");
 
-// Étape 1 : règles de validation
+// Step 1 : validation rules
 exports.verifyConference = [
   body("city").trim().notEmpty().withMessage("City is required."),
   body("country").trim().notEmpty().withMessage("Country is required."),
@@ -515,7 +515,7 @@ exports.verifyContact = [
     .withMessage("Conference id has to be a valid integer."),
 ];
 
-// Étape 2 : middleware d'erreurs
+// Step 2 : error handler
 exports.handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

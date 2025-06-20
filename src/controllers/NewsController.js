@@ -3,14 +3,10 @@ const { Op } = require("sequelize");
 const path = require("path");
 const fs = require("fs/promises");
 
-// ====================== MÉTHODES "DATA" ====================== //
-
-// Récupère toutes les news
 exports.getAllNewsData = async () => {
   return await News.findAll();
 };
 
-// Récupère une news par ID
 exports.getNewsByIdData = async (id) => {
   return await News.findByPk(id);
 };
@@ -21,7 +17,6 @@ exports.getNewsByConference = async (conference_id) => {
   });
 };
 
-// Récupère les news en fonction des dates
 exports.getNewsByTimeStampData = async () => {
   try {
     const currentDate = new Date();
@@ -39,9 +34,6 @@ exports.getNewsByTimeStampData = async () => {
   }
 };
 
-// ====================== MÉTHODES "HTTP" ====================== //
-
-// Récupère toutes les news
 exports.getAllNews = async (req, res) => {
   try {
     const news = await exports.getAllNewsData();
@@ -51,14 +43,13 @@ exports.getAllNews = async (req, res) => {
   }
 };
 
-// Récupère une news par ID
 exports.getNewsById = async (req, res) => {
   try {
     const { id } = req.params;
     const targetedNews = await exports.getNewsByIdData(id);
 
     if (!targetedNews) {
-      return res.status(404).json({ error: "News non trouvée" });
+      return res.status(404).json({ error: "No news found" });
     }
 
     res.status(200).json(targetedNews);
@@ -67,7 +58,6 @@ exports.getNewsById = async (req, res) => {
   }
 };
 
-// Récupère les news en cours
 exports.getNewsByTimeStamp = async (req, res) => {
   try {
     const news = await exports.getNewsByTimeStampData();
@@ -77,7 +67,6 @@ exports.getNewsByTimeStamp = async (req, res) => {
   }
 };
 
-// Crée une news
 exports.createNews = async (req, res) => {
   const folder = req.uploadFolder || "news-files";
   const uploadedFile = req.file ? `${folder}/${req.file.filename}` : null;
@@ -97,7 +86,7 @@ exports.createNews = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "News créée avec succès",
+      message: "News has been successfully created!",
       newItem: newNews,
     });
   } catch (error) {
@@ -110,7 +99,6 @@ exports.createNews = async (req, res) => {
   }
 };
 
-// Met à jour une news
 exports.updateNews = async (req, res) => {
   const folder = req.uploadFolder || "news-files";
   const uploadedFile = req.file ? `${folder}/${req.file.filename}` : null;
@@ -156,7 +144,6 @@ exports.updateNews = async (req, res) => {
   }
 };
 
-// Supprime une news par ID
 exports.deleteNewsById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -180,7 +167,6 @@ exports.deleteNewsById = async (req, res) => {
   }
 };
 
-// Supprime les news expirées
 exports.deletePastNews = async (req, res) => {
   try {
     const currentDate = new Date();

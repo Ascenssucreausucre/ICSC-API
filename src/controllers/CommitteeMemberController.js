@@ -2,7 +2,6 @@ const sequelize = require("../config/sequelize");
 const { CommitteeMember, Committee, CommitteeRole } = require("../models");
 const { Op, where } = require("sequelize");
 
-// Méthode Data pour récupérer un membre par son ID
 exports.getMemberByIdData = async (id) => {
   return await CommitteeMember.findOne({
     where: { id },
@@ -24,7 +23,6 @@ exports.getMemberByIdData = async (id) => {
   });
 };
 
-// Méthode Data pour récupérer les membres d'un comité
 exports.getMembersByCommitteeData = async (committee_id) => {
   const committee = await Committee.findByPk(committee_id, {
     include: [
@@ -57,7 +55,6 @@ exports.getExistingCommitteeMembers = async (req, res) => {
   }
 };
 
-// Endpoint HTTP pour récupérer un membre par son ID
 exports.getMemberById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -73,7 +70,6 @@ exports.getMemberById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-// Endpoint HTTP pour récupérer les membres d'un comité
 exports.getMembersByCommittee = async (req, res) => {
   try {
     const { committee_id } = req.params;
@@ -90,7 +86,6 @@ exports.getMembersByCommittee = async (req, res) => {
   }
 };
 
-// Création d'un membre
 exports.createCommitteeMember = async (req, res) => {
   try {
     const newMember = await CommitteeMember.create(req.body);
@@ -115,12 +110,10 @@ exports.createCommitteeMembers = async (req, res) => {
   }
 };
 
-// Mise à jour du rôle d'un membre
 exports.updateMemberRole = async (req, res) => {
   try {
     const { committee_id, member_id, title } = req.body;
 
-    // Vérifier si l'association membre-comité existe
     const memberCommittee = await CommitteeRole.findOne({
       where: { committee_id: committee_id, member_id: member_id },
     });
@@ -142,13 +135,12 @@ exports.updateMemberRole = async (req, res) => {
 
 exports.updateMemberRoles = async (req, res) => {
   try {
-    const { committee_id, roles } = req.body; // roles = [{ member_id, title }, ...]
+    const { committee_id, roles } = req.body;
 
     if (!Array.isArray(roles) || roles.length === 0) {
       return res.status(400).json({ error: "Invalid roles data." });
     }
 
-    // Trouver toutes les associations membres-comité à mettre à jour
     const memberCommittees = await CommitteeRole.findAll({
       where: {
         committee_id: committee_id,
@@ -160,14 +152,13 @@ exports.updateMemberRoles = async (req, res) => {
       return res.status(404).json({ error: "No members found in committee." });
     }
 
-    // Mise à jour des rôles en batch
     await Promise.all(
       memberCommittees.map((memberCommittee) => {
         const newRole = roles.find(
           (r) => r.member_id === memberCommittee.member_id
         );
         if (newRole) {
-          memberCommittee.title = newRole.title || ""; // Permet de vider le titre si besoin
+          memberCommittee.title = newRole.title || "";
           return memberCommittee.save();
         }
       })
@@ -180,7 +171,6 @@ exports.updateMemberRoles = async (req, res) => {
   }
 };
 
-// Ajout d'un rôle à un membre
 exports.addRoleToMember = async (req, res) => {
   try {
     const { committee_id, member_id, title } = req.body;
@@ -204,7 +194,6 @@ exports.addRoleToMember = async (req, res) => {
   }
 };
 
-// Suppression d'un rôle d'un membre
 exports.removeRoleFromMember = async (req, res) => {
   try {
     const { committee_id, member_id, title } = req.body;
@@ -234,7 +223,6 @@ exports.removeRoleFromMember = async (req, res) => {
   }
 };
 
-// Suppression d'un membre
 exports.deleteMember = async (req, res) => {
   try {
     const { id } = req.params;
@@ -261,13 +249,11 @@ exports.updateMember = async (req, res) => {
     const { id } = req.params;
     const { name, surname, affiliation } = req.body;
 
-    // Trouver le membre par son ID
     const member = await CommitteeMember.findByPk(id);
     if (!member) {
       return res.status(404).json({ error: "Member not found." });
     }
 
-    // Mettre à jour les champs fournis
     if (name !== undefined) member.name = name;
     if (surname !== undefined) member.surname = surname;
     if (affiliation !== undefined) member.affiliation = affiliation;
@@ -282,13 +268,12 @@ exports.updateMember = async (req, res) => {
 };
 exports.updateMembers = async (req, res) => {
   try {
-    const { members } = req.body; // members = [{ id, name, surname, affiliation }, ...]
+    const { members } = req.body;
 
     if (!Array.isArray(members) || members.length === 0) {
       return res.status(400).json({ error: "Invalid members data." });
     }
 
-    // Trouver tous les membres à mettre à jour
     const memberIds = members.map((m) => m.id);
     const existingMembers = await CommitteeMember.findAll({
       where: { id: memberIds },
@@ -298,7 +283,6 @@ exports.updateMembers = async (req, res) => {
       return res.status(404).json({ error: "One or more members not found." });
     }
 
-    // Mettre à jour les membres
     await Promise.all(
       existingMembers.map((member) => {
         const updatedData = members.find((m) => m.id === member.id);
@@ -332,14 +316,14 @@ exports.clearMembers = async (req, res) => {
         {
           model: Committee,
           as: "committees",
-          required: false, // Ceci permet d'effectuer un LEFT JOIN
+          required: false,
           through: {
-            attributes: [], // Ne récupère pas les attributs de la table de jonction
+            attributes: [],
           },
         },
       ],
       where: {
-        "$committees.id$": null, // Vérifier les membres qui n'ont aucun comité (aucune association dans la table de jonction)
+        "$committees.id$": null,
       },
     });
     if (!membersToClear) {
@@ -361,20 +345,19 @@ exports.clearMembers = async (req, res) => {
 };
 exports.getMembersToClear = async (req, res) => {
   try {
-    // Récupérer les membres sans comité en vérifiant la table de jonction `CommitteeRole`
     const membersToClear = await CommitteeMember.findAll({
       include: [
         {
           model: Committee,
           as: "committees",
-          required: false, // Ceci permet d'effectuer un LEFT JOIN
+          required: false,
           through: {
-            attributes: [], // Ne récupère pas les attributs de la table de jonction
+            attributes: [],
           },
         },
       ],
       where: {
-        "$committees.id$": null, // Vérifier les membres qui n'ont aucun comité (aucune association dans la table de jonction)
+        "$committees.id$": null,
       },
     });
 

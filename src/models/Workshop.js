@@ -41,14 +41,14 @@ module.exports = (sequelize) => {
         },
       },
       presenters: {
-        type: DataTypes.STRING, // Liste des personnes sous forme d'objet JSON
+        type: DataTypes.STRING,
         allowNull: true,
       },
       conference_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "conferences", // Correspond au nom de la table en BDD
+          model: "conferences",
           key: "id",
         },
       },

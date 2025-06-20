@@ -67,22 +67,22 @@ io.on("connection", (socket) => {
   });
 });
 
-// Erreur globale
+// Global error
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send("Quelque chose s'est mal passé !");
+  res.status(500).send("Something went wrong");
 });
 
-// ➤ Export de l'app ET d'une fonction d'initialisation
+// Exports the app + initializing function
 module.exports = {
   app,
   server,
   init: async () => {
     try {
-      await models.sync(); // Assure la synchro DB ici
-      console.log("✅ Base de données synchronisée");
+      await models.sync();
+      console.log("✅ Database synchronized");
     } catch (err) {
-      console.error("❌ Erreur de synchronisation :", err);
+      console.error("❌ Synchronization error :", err);
       throw err;
     }
   },
