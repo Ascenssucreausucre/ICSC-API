@@ -260,19 +260,21 @@ exports.updateArticleStatus = async (req, res) => {
 
 exports.bulkUpdateArticleStatus = async (req, res) => {
   try {
-    const { ids } = req.body;
+    const { ids, conferenceId } = req.body;
     const { status } = req.body;
 
     if (!Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({ error: "IDs must be a non-empty array." });
+      return res.status(400).json({ error: "PINs must be a non-empty array." });
     }
 
-    const articles = await Article.findAll({ where: { id: ids } });
+    const articles = await Article.findAll({
+      where: { nr: ids, conference_id: conferenceId },
+    });
 
     if (articles.length === 0) {
       return res
         .status(404)
-        .json({ error: "No articles found for the provided IDs." });
+        .json({ error: "No articles found for the provided PINs." });
     }
     await Promise.all(
       articles.map((article) => {
