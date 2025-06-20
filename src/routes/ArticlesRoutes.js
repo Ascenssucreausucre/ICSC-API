@@ -14,7 +14,7 @@ const uploadFile = createUploader({
     "application/vnd.ms-excel", // .xls
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
   ],
-  maxSize: 10 * 1024 * 1024, // 10 Mo (ajustable)
+  maxSize: 10 * 1024 * 1024, // 10 Mo (adjustable)
 });
 
 router.get("/", ArticleController.findAllArticles);

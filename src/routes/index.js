@@ -16,8 +16,7 @@ fs.readdirSync(routesPath).forEach((file) => {
     const fullPath = `/${routeName}`;
     router.use(fullPath, route);
 
-    // 🪵 Log de debug
-    console.log(`✅ Route chargée : /api${fullPath} -> ${file}`);
+    console.log(`✅ Route loaded : /api${fullPath} -> ${file}`);
   }
 });
 

@@ -20,7 +20,7 @@ const uploadFile = createUploader({
     "application/vnd.ms-powerpoint", // .ppt
     "application/vnd.openxmlformats-officedocument.presentationml.presentation", // .pptx
   ],
-  maxSize: 10 * 1024 * 1024, // 10 Mo (ajustable)
+  maxSize: 10 * 1024 * 1024, // 10 Mo (adjustable)
 });
 
 // router.get("/", LocalInformationController.getAll);

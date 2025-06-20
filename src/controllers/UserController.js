@@ -330,7 +330,7 @@ exports.unlinkAuthor = async (req, res) => {
     if (userPushSubscriptions.length > 0) {
       const payload = {
         title: "Your account is no longer linked to an author.",
-        body: `The administration team has decided to unlink the author your account has been linked to, due to a suspicion of usurpating someone else's identity.`,
+        body: `The administration team has decided to unlink the author your account has been linked to, due to a suspicion of impersonating someone else.`,
         tag: `unlinkAuthor_${user.id}`,
       };
 

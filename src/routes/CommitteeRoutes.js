@@ -10,20 +10,16 @@ const {
   verifyCommitteeMembers,
 } = require("../middleware/validators");
 
-// Récupérer tous les comités
 router.get("/", CommitteeController.getAllCommittees);
 
-// Récupérer les comités de la conférence actuelle
 router.get(
   "/current",
   getCurrentConference,
   CommitteeController.getCurrentCommittees
 );
 
-// Récupérer un comité par son ID
 router.get("/:id", CommitteeController.getCommitteeById);
 
-// Créer un nouveau comité
 router.post(
   "/",
   authenticateAdmin,
@@ -32,14 +28,12 @@ router.post(
   CommitteeController.createCommittee
 );
 
-// Supprimer un comité
 router.delete(
   "/delete/:id",
   authenticateAdmin,
   CommitteeController.deleteCommitte
 );
 
-// Mettre à jour un comité
 router.put(
   "/update/:id",
   authenticateAdmin,
@@ -48,7 +42,6 @@ router.put(
   CommitteeController.updateCommittee
 );
 
-// Ajouter un membre à un comité
 router.post(
   "/add-member",
   authenticateAdmin,
@@ -65,7 +58,6 @@ router.post(
   CommitteeController.addMembersToCommittee
 );
 
-// Retirer un membre d'un comité
 router.post(
   "/remove-member",
   authenticateAdmin,
